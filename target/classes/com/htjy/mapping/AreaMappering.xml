@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.htjy.dao.AreaDao">
+	<select id="queryAreaList" parameterType="String" resultMap="areaMap">
+		SELECT p.id pid,p.name pname,c.id cid,c.name cname,a.id aid,a.name
+		aname from
+		t_province_info p LEFT JOIN
+		t_city_info c ON p.id=c.province
+		LEFT JOIN t_area_info a
+		on c.id=a.city
+	</select>
+	
+	<resultMap type="com.htjy.entity.AreaModel" id="areaMap">
+		<result column="pid" property="pid" />
+		<result column="pname" property="pname" />
+		<collection property="city" ofType="com.htjy.entity.AreaCity">
+			<result property="cid" column="cid" />
+			<result property="cname" column="cname" />
+			<collection property="areaQus" ofType="com.htjy.entity.AreaQu">
+				<result property="aid" column="aid" />
+				<result property="aname" column="aname" />
+			</collection>
+		</collection>
+	</resultMap>
+	<resultMap type="com.htjy.entity.SchoolType" id="schoolMap">
+		<result column="pid" property="pid" />
+		<result column="pname" property="pname" />
+		<collection property="schoolModel" ofType="com.htjy.entity.SchoolModel">
+			<result property="cid" column="cid" />
+			<result property="cname" column="cname" />
+			<collection property="schoolDream" ofType="com.htjy.entity.SchoolDream">
+				<result property="aid" column="aid" />
+				<result property="aname" column="aname" />
+			</collection>
+		</collection>
+	</resultMap>
+	<select id="queryRecruitList" parameterType="String" resultType="com.htjy.entity.NationModel">
+		select * from t_recruit_school_area_info
+	</select>
+	<select id="queryNationList" parameterType="String" resultType="com.htjy.entity.NationModel">
+		select * from t_nation_info
+	</select>
+	<select id="queryRegisterList" parameterType="String" resultType="com.htjy.entity.RegisterModel">
+		select * from t_registered_residence
+	</select>
+	<select id="queryExamList" parameterType="String" resultType="com.htjy.entity.NationModel">
+		select * from t_examination_area_info
+	</select>
+	<select id="querySchoolList" parameterType="String" resultMap="schoolMap">
+		SELECT 
+		c.arrangement pid,
+		case c.arrangement 
+		WHEN 1 THEN "中职"
+		WHEN 2 THEN "高中起点本科类"
+		WHEN 3 THEN "高中起点高职高专"
+		WHEN 4 THEN "专科升本科类"
+		END as pname, 
+		c.id cid,c.name cname,
+		a.id aid,a.name aname 
+		from
+		t_school_info c LEFT JOIN
+		t_major_info a ON c.id=a.schoolId
+	</select>
+</mapper>
+ 

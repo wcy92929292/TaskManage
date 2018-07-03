@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.htjy.dao.MajorInfoDao">
+    
+    <resultMap type="com.htjy.dbo.MajorInfo" id="majorInfoMap">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="schoolId" property="schoolId" />
+		<result column="price" property="price" />
+	</resultMap>
+	
+	<select id="list" resultMap="majorInfoMap">
+		SELECT
+			id, name, schoolId, price
+		FROM 
+			t_major_info
+		WHERE
+			schoolId = #{schoolId} 
+	</select>
+	
+</mapper>

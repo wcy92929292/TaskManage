@@ -1,0 +1,28 @@
+[{
+    "usersId" : "1",
+    "userName" : "贤心",
+    "userEmail" : "xianxin@layui.com",
+    "userSex" : "男",
+    "userScore" : "150",
+    "userAdd" : "北京市海淀区北四环西路52号",
+    "userRealStatus" : "已实名",
+    "userEndTime" : "2017-05-14 15:35"
+},{
+    "usersId" : "2",
+    "userName" : "纸飞机",
+    "userEmail" : "fly@layui.com",
+    "userSex" : "男",
+    "userScore" : "300",
+    "userAdd" : "北京市海淀区北四环西路52号",
+    "userRealStatus" : "已实名",
+    "userEndTime" : "2017-05-14 16:25"
+},{
+    "usersId" : "3",
+    "userName" : "请叫我马哥",
+    "userEmail" : "mage@layui.com",
+    "userSex" : "男",
+    "userScore" : "100",
+    "userAdd" : "北京市海淀区北四环西路52号",
+    "userRealStatus" : "已实名",
+    "userEndTime" : "2017-05-10 10:30"
+}]

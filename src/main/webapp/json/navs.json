@@ -1,0 +1,26 @@
+[{
+	"title" : "后台首页",
+	"icon" : "icon-computer",
+	"href" : "page/main.html",
+	"spread" : false
+},{
+	"title" : "任务列表",
+	"icon" : "icon-text",
+	"href" : "page/news/newsList.html",
+	"spread" : false
+},{
+	"title" : "审核列表",
+	"icon" : "icon-text",
+	"href" : "page/news/newsListToday.html",
+	"spread" : false
+},{
+	"title" : "用户列表",
+	"icon" : "icon-text",
+	"href" : "page/user/allUsers.html",
+	"spread" : false
+},{
+	"title" : "提现审核列表",
+	"icon" : "icon-text",
+	"href" : "page/news/applyList.html",
+	"spread" : false
+}]

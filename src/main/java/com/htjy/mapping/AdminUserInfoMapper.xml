@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.htjy.dao.AdminUserInfoDao">
+    
+	<!-- <resultMap type="com.htjy.entity.AdminUserInfo" id="adminUserInfoMap">
+		<id column="adminId" property="adminId" />
+		<result column="name" property="name" />
+		<result column="role" property="role" />
+		<result column="password" property="password" />
+		<result column="username" property="userName" />
+	</resultMap> -->
+
+	<select id="login" resultType="com.htjy.entity.AdminUserInfo" parameterType="String" >
+		SELECT
+			a.*
+		FROM 
+			tb_admin_user a
+			
+		WHERE
+			a.loginName = #{username}
+		AND
+			a.password = #{password}
+	</select>
+	
+	<select id="queryManager" parameterType="String" resultType="com.htjy.entity.AdminUserInfo">
+		select * from t_admin_user_info where role=3
+	</select>
+	
+	<insert id="add" parameterType="com.htjy.entity.AdminUserInfo">
+		insert into t_admin_user_info (name,username,password,role,parentId)
+		values(#{name},#{userName},#{password},#{role},#{parentId})
+	</insert>
+	
+	<select id="queryAll" parameterType="String" resultType="com.htjy.entity.AdminUserInfo">
+		select a.*,b.name parentName from t_admin_user_info a left join t_admin_user_info b on a.parentId=b.adminId where a.role!=0
+	</select>
+	<!-- <select id="queryById" parameterType="String" resultType="com.htjy.entity.AdminUserInfo">
+		select * from t_admin_user_info
+	</select> -->
+	<update id="update" parameterType="com.htjy.entity.AdminUserInfo">
+	update t_admin_user_info set name=#{name},role=#{role},username=#{userName},password=#{password},parentId=#{parentId}
+	where adminId=#{adminId}
+	</update>
+	<select id="queryNextTeacher" parameterType="int" resultType="com.htjy.entity.AdminUserInfo">
+		select * from t_admin_user_info where parentId=#{param1}
+	</select>
+	
+	<delete id="delAdmin" parameterType="int">
+		delete from t_admin_user_info where id=#{param1}
+	</delete>
+	
+	<select id="selectAdminIdById" resultType="com.htjy.entity.AdminUserInfo">
+	    SELECT adminId FROM t_admin_user_info WHERE adminId = #{adminId};
+	</select>
+	<select id="queryTeacherList" resultType="com.htjy.entity.AdminUserInfo">
+	    SELECT * FROM t_admin_user_info WHERE (role = 4 or role=3) and name!='微信_不能删';
+	</select>
+</mapper>
