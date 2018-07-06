@@ -24,11 +24,11 @@ public class RedirectFilter implements Filter {
         HttpSession session = request.getSession(false);  
         //根据indexOf原则，如果不包含login.html 则返回-1，业务上就要进行session判断处理
         if (currentURL.indexOf("login.html")==-1) {
-        	 if (session == null || session.getAttribute("user") == null) {  
-        		 StringBuffer url = request.getRequestURL();  
-                 response.sendRedirect(request.getContextPath() + "/login.html");  
-                 return;  
-             }  
+//        	 if (session == null || session.getAttribute("user") == null) {  
+//        		 StringBuffer url = request.getRequestURL();  
+//                 response.sendRedirect(request.getContextPath() + "/login.html");  
+//                 return;  
+//             }  
          }  
         filterChain.doFilter(request, response);   
 	}

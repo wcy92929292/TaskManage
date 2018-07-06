@@ -9,6 +9,7 @@ import java.util.Random;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -17,31 +18,34 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alibaba.fastjson.JSONObject;
+import com.htjy.dao.TaskDao;
 import com.htjy.util.UploadUtil;
 
 @Controller
 @RequestMapping("/upload")
 public class UploadController {
+	
+	@Autowired TaskDao taskDao;
+	
 	@ResponseBody
 	@RequestMapping(value = "/uploadHead.do", method = RequestMethod.POST)
-	public JSONObject uploadImg(MultipartFile file) {
+	public JSONObject uploadImg(MultipartFile file,@RequestParam("aid") String aid) {
 		JSONObject object = new JSONObject(); 
 		JSONObject objectSrc = new JSONObject(); 
         if (null != file) {
-            String myFileName = file.getOriginalFilename();// �ļ�ԭ����
+            String myFileName = file.getOriginalFilename();//获取原始名字
             String fileName = //BasePath.getImgPath("yyyyMMddHHmmss")+
                     Integer.toHexString(new Random().nextInt()) +"."+ myFileName.
                     substring(myFileName.lastIndexOf(".") + 1);  
-//            String pat=FileProperties.getFilePath()+"/src/main/webapp/";//��ȡ�ļ�����·��
-//            String sqlPath="static/images/upload/storeHead/"+BasePath.getImgPath("yyyyMMdd")+"/"; 
             File fileDir=new File(UploadUtil.getUploadPath());
-            if (!fileDir.exists()) { //��������� �򴴽�     
+            if (!fileDir.exists()) { 
                  fileDir.mkdirs();    
              } 
             String path=UploadUtil.getUploadPath()+fileName;
             File localFile = new File(path);  
             try {
                 file.transferTo(localFile);
+                taskDao.updateTaskingStatus(fileName,aid);
                 objectSrc.put("src", fileName);
                 object.put("code", 0);
                 object.put("msg", "");

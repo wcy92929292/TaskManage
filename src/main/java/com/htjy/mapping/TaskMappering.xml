@@ -3,6 +3,7 @@
  "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 
 <mapper namespace="com.htjy.dao.TaskDao">
+	<!-- 后台管理员增加任务 加任务表 -->
 	<insert id="addTask" parameterType="com.htjy.entity.TaskModel" useGeneratedKeys="true">
 		<selectKey resultType="int" order="AFTER" keyProperty="id"> 
 	    SELECT LAST_INSERT_ID() AS id 
@@ -13,7 +14,7 @@
 		(#{title},#{type},#{location},#{address},#{lockTime},
 		#{remark},#{schedule},#{score},#{setPerson},now())
 	</insert>
-	
+	<!-- 加任务排期表 -->
 	<insert id="addTaskSchedule">
 		insert into tb_task_schedule_info (tid,daytime)
 		values
@@ -21,12 +22,106 @@
             (#{emp.tid},#{emp.daytime})  
         </foreach> 
 	</insert>
-	
+	<!-- 后台的任务列表页 -->
 	<select id="getTaskList" parameterType="String" resultType="com.htjy.entity.TaskModel">
 		select * from tb_task_info where 1=1
 		<if test='title!=null and title!="" '>
 			and title like concat(concat('%',#{title}),'%')
 		</if>
 	</select>
+	
+	<select id="getTaskDetail" parameterType="String" resultType="com.htjy.entity.TaskModel">
+		select * from tb_task_info where id=#{tid}
+	</select>
+	<!-- 获取某人未完成任务数 -->
+	<select id="getUserNoCompleteNum" parameterType="Integer" resultType="int">
+		select count(*) from tb_task_apply_info where status='0' and userId=#{id}
+	</select>
+	<!-- 获取某人未审核任务数 -->
+	<select id="getUserNoCheckNum" parameterType="Integer" resultType="int">
+		select count(*) from tb_task_apply_info where status='1' and userId=#{id}
+	</select>
+	<!-- 获取某人已完成任务数 -->
+	<select id="getUserCompleteNum" parameterType="Integer" resultType="int">
+		select count(*) from tb_task_apply_info where status='2' and userId=#{id}
+	</select>
+	<!-- 获取某人已失败任务数 -->
+	<select id="getUserFailNum" parameterType="Integer" resultType="int">
+		select count(*) from tb_task_apply_info where status='3' and userId=#{id}
+	</select>
+	<!-- 获取当前日期可用的任务 -->
+	<select id="getTodayTaskList" parameterType="Integer" resultType="com.htjy.entity.TaskModel">
+		SELECT i.* FROM tb_task_schedule_info s 
+		left JOIN tb_task_info i on i.id=s.tid
+		LEFT JOIN tb_task_apply_info a on a.sid=s.id
+		WHERE s.daytime='2018-07-20' AND a.userId is null
+	</select>
+	<!-- 获取当前日期可用的任务（赏金排序）-->
+	<select id="getTodayTaskListScore" parameterType="Integer" resultType="com.htjy.entity.TaskModel">
+		SELECT i.* FROM tb_task_schedule_info s 
+		left JOIN tb_task_info i on i.id=s.tid
+		LEFT JOIN tb_task_apply_info a on a.sid=s.id
+		WHERE s.daytime='2018-07-20' AND a.userId is null
+		order by i.score desc
+	</select>
+	<!-- 获取今日任务的详细 -->
+	<select id="getTodayTaskDetail" parameterType="String" resultType="com.htjy.entity.TaskModel">
+		select * from tb_task_info i
+		where i.id=#{id}
+	</select>
+	<!-- 根据taskid获取他的排期的日历id -->
+	<select id="getSidById" parameterType="String" resultType="Integer">
+		select id from tb_task_schedule_info where tid=#{id} and daytime='2018-07-20'
+	</select>
+	<!-- 接受任务 计入到任务接受，审核表 -->
+	<insert id="acceptTask" useGeneratedKeys="true">
+		<selectKey resultType="int" order="AFTER" keyProperty="aid"> 
+	    SELECT LAST_INSERT_ID() AS aid 
+	    </selectKey>
+		insert into tb_task_apply_info (sid,userId,status,startTime,endTime,finishTime)
+		value(#{sid},#{userId},#{status},#{startTime},#{endTime},now())
+	</insert>
+	<!-- 获取和我先关的任务，即被我接受过的任务 -->
+	<select id="getMyAcceptTaskList" parameterType="String" resultType="com.htjy.entity.TaskModel">
+		select i.*,a.startTime,a.endTime,a.sid,a.userId,a.status,a.id aid,a.picture from tb_task_apply_info a
+		left join tb_task_schedule_info s on s.id=a.sid  
+		left join tb_task_info i on i.id=s.tid
+		where a.userId=#{id} 
+		<if test='status != "" and status !=null '>
+			and a.status = #{status}
+		</if>
+	</select>
+	<!-- 获取正在进行中的任务的详细 -->
+	<select id="getTaskingDetail" parameterType="String" resultType="com.htjy.entity.TaskModel">
+		select i.*,a.startTime,a.endTime,a.sid,a.userId,a.status,a.id aid,a.picture from tb_task_apply_info a
+		left join tb_task_schedule_info s on s.id=a.sid  
+		left join tb_task_info i on i.id=s.tid
+		where a.userId=#{uid} and s.id=#{sid}
+	</select>
+	<select id="updateTaskingStatus" parameterType="String" resultType="String">
+		update tb_task_apply_info set picture=#{fileName},status='1' where id=#{aid}
+	</select>
+	<!-- 取消任务 -->
+	<delete id="cancelMyAcceptTask" parameterType="String">
+		DELETE FROM tb_task_apply_info WHERE id = #{aid} 
+	</delete>
+	<!-- 管理员获取待审核列表 -->
+	<select id="getCheckingTaskList" parameterType="String" resultType="com.htjy.entity.TaskModel">
+		select i.*,a.startTime,a.endTime,a.finishTime,a.sid,a.userId,a.status,a.id aid,a.picture,u.phone,u.loginName from tb_task_apply_info a
+		left join tb_task_schedule_info s on s.id=a.sid  
+		left join tb_task_info i on i.id=s.tid
+		left join tb_task_user u on u.id=a.userId
+		where a.status = '1'
+	</select>
+	<!-- 审核通过 -->
+	<update id="updateTaskingStatusOk" parameterType="String">
+		update tb_task_apply_info set status='2',checkTime=now(),checkPerson='1'
+		where id=#{aid}
+	</update>
+	<!-- 审核失败-->
+	<update id="updateTaskingStatusNo" parameterType="String">
+		update tb_task_apply_info set status='3',checkTime=now(),checkPerson='1'
+		where id=#{aid}
+	</update>
 </mapper>
  

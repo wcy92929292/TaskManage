@@ -1,14 +1,12 @@
 package com.htjy.entity;
 
-import java.io.Serializable;
 import java.util.Date;
 
 /**
  * 任务表
  * 
  */
-public class TaskModel implements Serializable{
-	private static final long serialVersionUID = 1220558996312231663L;
+public class TaskModel extends TaskApplyModel{
 	 
 	/** id */
 	private Integer id;
@@ -25,7 +23,14 @@ public class TaskModel implements Serializable{
 	private Date setTime;
 	private Integer updatePerson;
 	private Date updateTime;
+	private Integer distance;
 	
+	public Integer getDistance() {
+		return distance;
+	}
+	public void setDistance(Integer distance) {
+		this.distance = distance;
+	}
 	public Integer getSetPerson() {
 		return setPerson;
 	}

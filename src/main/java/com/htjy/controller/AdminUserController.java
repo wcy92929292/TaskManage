@@ -47,7 +47,7 @@ public class AdminUserController {
 				result.setResult(false);
 			} else {
 				HttpSession session = request.getSession();
-				session.setAttribute("user", adminUser);
+				session.setAttribute("admin", adminUser);
 				session.setAttribute(SessionAttributeNameEnum.ADMIN_USER.getValue(), adminUser);
 				adminUser.setPassword(password);
 				result.setData(adminUser);
@@ -64,14 +64,14 @@ public class AdminUserController {
 	public void logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		HttpSession session = request.getSession();
 		session.removeAttribute(SessionAttributeNameEnum.ADMIN_USER.getValue());
-		session.removeAttribute("user");
-		response.sendRedirect("../login.html");
+		session.removeAttribute("admin");
+		response.sendRedirect("../admin/login.html");
 	}
 
 	@ResponseBody
 	@RequestMapping(value = "getAdminUserName.do", method = { RequestMethod.POST, RequestMethod.GET },produces="text/html;charset=UTF-8")
 	public String getAdminUserName(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws IOException {
-		AdminUserInfo user = (AdminUserInfo) session.getAttribute("user");
+		AdminUserInfo user = (AdminUserInfo) session.getAttribute("admin");
 		JSONObject o = new JSONObject();
 		if (user == null) {
 			o.put("data", "");
