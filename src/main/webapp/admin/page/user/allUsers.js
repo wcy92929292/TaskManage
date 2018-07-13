@@ -8,12 +8,13 @@ layui.config({
 
 	//加载页面数据
 	var usersData = '';
-	$.get("../../json/usersList.json", function(data){
-		usersData = data;
-		if(window.sessionStorage.getItem("addUser")){
-			var addUser = window.sessionStorage.getItem("addUser");
-			usersData = JSON.parse(addUser).concat(usersData);
-		}
+	$.get("../../../user/getUserList.do", function(data){
+		console.log(data);
+		usersData = data.result;
+//		if(window.sessionStorage.getItem("addUser")){
+//			var addUser = window.sessionStorage.getItem("addUser");
+//			usersData = JSON.parse(addUser).concat(usersData);
+//		}
 		//执行加载数据的方法
 		usersList();
 	})
@@ -182,16 +183,11 @@ layui.config({
 				for(var i=0;i<currData.length;i++){
 					dataHtml += '<tr>'
 			    	+  '<td><input type="checkbox" name="checked" lay-skin="primary" lay-filter="choose"></td>'
-			    	+  '<td>'+currData[i].userName+'</td>'
-			    	+  '<td>'+currData[i].userEmail+'</td>'
-			    	+  '<td>'+currData[i].userSex+'</td>'
-			    	+  '<td>'+currData[i].userAdd+'</td>'
-			    	+  '<td>'+currData[i].userScore+'</td>'
-			    	+  '<td>'+currData[i].userRealStatus+'</td>'
-			    	+  '<td>'
-					+    '<a class="layui-btn layui-btn-mini users_edit"><i class="iconfont icon-edit"></i> 编辑</a>'
-					+    '<a class="layui-btn layui-btn-danger layui-btn-mini users_del" data-id="'+data[i].usersId+'"><i class="layui-icon">&#xe640;</i> 删除</a>'
-			        +  '</td>'
+			    	+  '<td>'+currData[i].loginName+'</td>'
+			    	+  '<td>'+currData[i].phone+'</td>'
+			    	+  '<td>'+currData[i].address+'</td>'
+			    	+  '<td>'+currData[i].score+'</td>'
+			    	+  '<td>'+transNameStatus(currData[i].nameStatus)+'</td>'
 			    	+'</tr>';
 				}
 			}else{

@@ -65,13 +65,24 @@ layui.config({
 //        },2000);
  		return false;
  	})
-	
+ 	
+//$("#location").on("keyup",function(){
+//	var myGeo = new BMap.Geocoder();
+//	// 将地址解析结果显示在地图上,并调整地图视野
+//	myGeo.getPoint($("#location").val(), function(point){
+//		if (point) {
+//			alert(point.lat+","+point.lng);
+//		}else{
+//			alert("您选择地址没有解析到结果!");
+//		}
+//	});
+////	$("#lation").val(point.lat+","+point.lng);
+//})
  	loadMapAutocomplete("location", "searchResultPanel");
  	
  	function G(id) {
         return document.getElementById(id);
     }
-
     function loadMapAutocomplete(suggestId, searchResultPanel) {
         var checkValue;
         Ac = new BMap.Autocomplete( //建立一个自动完成的对象
@@ -100,6 +111,15 @@ layui.config({
             var _value = e.item.value;
             checkValue = _value.province + _value.city + _value.district + _value.street + _value.business;
             G(searchResultPanel).innerHTML = "onconfirm<br />index = " + e.item.index + "<br />myValue = " + checkValue;
+            var myGeo = new BMap.Geocoder();
+        	// 将地址解析结果显示在地图上,并调整地图视野
+        	myGeo.getPoint($("#location").val(), function(point){
+        		if (point) {
+        			$("input[name=lation]").val(point.lat+","+point.lng);
+        		}else{
+        			$("input[name=lation]").val("您选择地址没有解析到结果!");
+        		}
+        	});
         });
     }
 })

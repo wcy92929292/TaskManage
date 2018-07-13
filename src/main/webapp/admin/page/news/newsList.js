@@ -284,7 +284,7 @@ layui.config({
 			    	+'<td>admin</td>';
 			    	if(Date.parse(currData[i].schedule.split(" - ")[0]) > d1){
 			    		dataHtml += '<td style="color:#f00">未开始</td>';
-			    	}else if(Date.parse(currData[i].schedule.split(" - ")[1]) < d1){
+			    	}else if(Date.parse(currData[i].schedule.split(" - ")[1]+" 23:59:59") < d1){
 			    		dataHtml += '<td style="color:#f0f">已过期</td>';
 			    	}else{
 			    		dataHtml += '<td >进行中</td>';

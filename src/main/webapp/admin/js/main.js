@@ -11,33 +11,25 @@ layui.config({
 	})
 
 	//动态获取文章总数和待审核文章数量,最新文章
-	$.get("../json/newsListToday.json",
+	$.get("../../task/getCheckingTaskNum.do",
 		function(data){
 			var waitNews = [];
-			$(".waitNewsToday span").text(data.length);  //文章总数
-			for(var i=0;i<data.length;i++){
-				var newsStr = data[i];
-				if(newsStr["newsStatus"] == "待审核"){
-					waitNews.push(newsStr);
-				}
-			}
-			$(".waitNews span").text(waitNews.length);  //待审核文章
-			//加载最新文章
-			var hotNewsHtml = '';
-			for(var i=0;i<5;i++){
-				hotNewsHtml += '<tr>'
-		    	+'<td align="left">'+data[i].newsName+'</td>'
-		    	+'<td>'+data[i].newsTime+'</td>'
-		    	+'</tr>';
-			}
-			$(".hot_news").html(hotNewsHtml);
+			$(".waitNews span").text(data.result);  //待审核文章
 		}
 	)
 
-	$.get("../json/newsList.json",
+	$.get("../../task/getTodayTaskNum.do",
 		function(data){
 			var waitNews = [];
-			$(".allNews span").text(data.length);  //文章总数
+			$(".waitNewsToday span").text(data.result);  //文章总数
+		}
+	)
+	
+	
+	$.get("../../task/getTaskNum.do",
+		function(data){
+			var waitNews = [];
+			$(".allNews span").text(data.result);  //文章总数
 		}
 	)
 	
@@ -50,9 +42,9 @@ layui.config({
 	)
 
 	//用户数
-	$.get("../json/usersList.json",
+	$.get("../../user/getUserList.do",
 		function(data){
-			$(".userAll span").text(data.length);
+			$(".userAll span").text(data.result.length);
 		}
 	)
 

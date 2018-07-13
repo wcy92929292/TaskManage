@@ -47,21 +47,21 @@
 	</select>
 	<!-- 获取某人已失败任务数 -->
 	<select id="getUserFailNum" parameterType="Integer" resultType="int">
-		select count(*) from tb_task_apply_info where status='3' and userId=#{id}
+		select count(*) from tb_task_apply_info where (status='3' or status='4') and userId=#{id}
 	</select>
 	<!-- 获取当前日期可用的任务 -->
 	<select id="getTodayTaskList" parameterType="Integer" resultType="com.htjy.entity.TaskModel">
 		SELECT i.* FROM tb_task_schedule_info s 
 		left JOIN tb_task_info i on i.id=s.tid
 		LEFT JOIN tb_task_apply_info a on a.sid=s.id
-		WHERE s.daytime='2018-07-20' AND a.userId is null
+		WHERE s.daytime= DATE_FORMAT(NOW(),'%Y-%m-%d') and (a.available is null or a.available='1')  and (a.status is null or a.status='3' or a.status='4')
 	</select>
 	<!-- 获取当前日期可用的任务（赏金排序）-->
 	<select id="getTodayTaskListScore" parameterType="Integer" resultType="com.htjy.entity.TaskModel">
 		SELECT i.* FROM tb_task_schedule_info s 
 		left JOIN tb_task_info i on i.id=s.tid
 		LEFT JOIN tb_task_apply_info a on a.sid=s.id
-		WHERE s.daytime='2018-07-20' AND a.userId is null
+		WHERE s.daytime=DATE_FORMAT(NOW(),'%Y-%m-%d') AND (a.available is null or a.available='1')   and (a.status is null or a.status='3' or a.status='4')
 		order by i.score desc
 	</select>
 	<!-- 获取今日任务的详细 -->
@@ -69,18 +69,24 @@
 		select * from tb_task_info i
 		where i.id=#{id}
 	</select>
-	<!-- 根据taskid获取他的排期的日历id -->
+	<!-- 根据taskid获取他的排期的日历id 接收任务使用，所以为当天 -->
 	<select id="getSidById" parameterType="String" resultType="Integer">
-		select id from tb_task_schedule_info where tid=#{id} and daytime='2018-07-20'
+		select id from tb_task_schedule_info where tid=#{id} and daytime=DATE_FORMAT(NOW(),'%Y-%m-%d')
 	</select>
 	<!-- 接受任务 计入到任务接受，审核表 -->
 	<insert id="acceptTask" useGeneratedKeys="true">
 		<selectKey resultType="int" order="AFTER" keyProperty="aid"> 
 	    SELECT LAST_INSERT_ID() AS aid 
 	    </selectKey>
-		insert into tb_task_apply_info (sid,userId,status,startTime,endTime,finishTime)
-		value(#{sid},#{userId},#{status},#{startTime},#{endTime},now())
+		insert into tb_task_apply_info (sid,userId,status,startTime,endTime,available)
+		value(#{sid},#{userId},#{status},#{startTime},#{endTime},'0')
 	</insert>
+	<!-- 更新可用性 -->
+	<update id="updateAvail" parameterType="Integer">
+		update tb_task_apply_info a,
+		(select sid,id from tb_task_apply_info where id=#{aid})p
+		set available='0' where a.sid=p.sid
+	</update>
 	<!-- 获取和我先关的任务，即被我接受过的任务 -->
 	<select id="getMyAcceptTaskList" parameterType="String" resultType="com.htjy.entity.TaskModel">
 		select i.*,a.startTime,a.endTime,a.sid,a.userId,a.status,a.id aid,a.picture from tb_task_apply_info a
@@ -90,16 +96,19 @@
 		<if test='status != "" and status !=null '>
 			and a.status = #{status}
 		</if>
+		<if test="status == 3 ">
+			or a.status = '4'
+		</if>
 	</select>
 	<!-- 获取正在进行中的任务的详细 -->
 	<select id="getTaskingDetail" parameterType="String" resultType="com.htjy.entity.TaskModel">
 		select i.*,a.startTime,a.endTime,a.sid,a.userId,a.status,a.id aid,a.picture from tb_task_apply_info a
 		left join tb_task_schedule_info s on s.id=a.sid  
 		left join tb_task_info i on i.id=s.tid
-		where a.userId=#{uid} and s.id=#{sid}
+		where a.userId=#{uid} and a.id=#{aid}
 	</select>
 	<select id="updateTaskingStatus" parameterType="String" resultType="String">
-		update tb_task_apply_info set picture=#{fileName},status='1' where id=#{aid}
+		update tb_task_apply_info set picture=#{fileName},status='1',finishTime=now() where id=#{aid}
 	</select>
 	<!-- 取消任务 -->
 	<delete id="cancelMyAcceptTask" parameterType="String">
@@ -111,7 +120,7 @@
 		left join tb_task_schedule_info s on s.id=a.sid  
 		left join tb_task_info i on i.id=s.tid
 		left join tb_task_user u on u.id=a.userId
-		where a.status = '1'
+	--	where a.status = '1'
 	</select>
 	<!-- 审核通过 -->
 	<update id="updateTaskingStatusOk" parameterType="String">
@@ -120,8 +129,106 @@
 	</update>
 	<!-- 审核失败-->
 	<update id="updateTaskingStatusNo" parameterType="String">
-		update tb_task_apply_info set status='3',checkTime=now(),checkPerson='1'
+		update tb_task_apply_info set status='3',available='1',checkTime=now(),checkPerson='1'
 		where id=#{aid}
 	</update>
+	<!-- 待审核数量 -->
+	<select id="getCheckingTaskNum" parameterType="String" resultType="int">
+		select count(*) from tb_task_apply_info 
+		where status = '1'
+	</select>
+	<select id="getTodayTaskNum" parameterType="String" resultType="int">
+		select count(*) from tb_task_schedule_info 
+		where daytime = #{strDate}
+	</select>
+	<!-- 总任务数 -->
+	<select id="getTaskNum" parameterType="String" resultType="int">
+		select count(*) from tb_task_info 
+	</select>
+	<!-- 自动执行的过期更新状态任务 -->
+	<update id="updateScheduleStatus" parameterType="String">
+		update tb_task_apply_info set status='4',available='1' where now()>endTime  and status='0'
+	</update>
+	<select id="getUserIdByAid" parameterType="String" resultType="int">
+		select userId from tb_task_apply_info where id=#{aid}
+	</select>
+	<!-- 任务成功 加分 -->
+	<insert id="addSbScore" parameterType="Integer">
+		insert into tb_task_user_score_detail (userId,scoreChange,changeTime,changeType,changeStatus,cid)
+		value (#{userId},#{score},now(),#{type},#{status},#{cid})
+	</insert>
+	<update id="updateSbScore" parameterType="Integer">
+		update tb_task_user_score s ,
+		(select score,userId from tb_task_user_score where userId=#{userId}) o
+		set s.score=#{score}+o.score
+		where s.userId=o.userId
+	</update>
+	<!-- 获取任务的分数 -->
+	<select id="getTaskScore" parameterType="String" resultType="Integer">
+		select i.score from tb_task_apply_info a
+		left join tb_task_schedule_info s on s.id=a.sid  
+		left join tb_task_info i on i.id=s.tid
+		where a.userId=#{userId} and a.id=#{aid}
+	</select>
+	<select id="getScoreDetails" parameterType="Integer" resultType="com.htjy.entity.ScoreDetailModel">
+		select * from tb_task_user_score_detail where userId=#{userId} order by changeTime desc
+	</select>
+	<select id="getUserScore" parameterType="Integer" resultType="Integer">
+		select score from tb_task_user_score where userId=#{userId}
+	</select>
+	<!-- 更改这个人的银行卡号 -->
+	<update id="updateBank" parameterType="String">
+		update tb_task_user set collectBank=#{bank},collectAccount=#{number} where id=#{userId}
+	</update>
+	<!-- 更改这个人的Weixin/zhifubo二维码 -->
+	<update id="updateQrc" parameterType="String">
+		update tb_task_user set 
+		<if test='flag == "1" '>
+			weixinQrc=#{fileName} 
+		</if>
+		<if test='flag == "2" '>
+			zhifubaoQrc=#{fileName}
+		</if>
+		where id=#{userId}
+	</update>
+	<!-- 获取我的 -->
+	<select id="getMyBank" parameterType="Integer" resultType="com.htjy.entity.UserModel">
+		select * from tb_task_user where id=#{userId}
+	</select>
+	<!-- 插入提现表 -->
+	<insert id="insertCollectScore" useGeneratedKeys="true">
+		<selectKey resultType="int" order="AFTER" keyProperty="cid"> 
+	    	SELECT LAST_INSERT_ID() AS cid 
+	    </selectKey>
+		insert into tb_task_user_score_collect_info (userId,collectScore,collectStatus,collectType,applyTime)
+		values(#{userId},#{collectScore},'0',#{collectType},now())
+	</insert>
+	<!-- 获取提现审核的所有记录 -->
+	<select id="getApplyCollectionList" parameterType="String" resultType="com.htjy.entity.TaskCollectModel">
+		SELECT u.loginName,u.collectBank,u.collectAccount,u.weixinQrc,u.zhifubaoQrc,c.id cid,c.* from tb_task_user_score_collect_info c
+		left JOIN tb_task_user u on u.id=c.userId
+	</select>
+	<!-- 更新提现状态  成功 -->
+	<update id="updateCollectingStatusOk" parameterType="String">
+		update tb_task_user_score_collect_info set collectStatus='1',handleTime=now()
+		where id=#{cid}
+	</update>
+	<!-- 更新流水状态 -->
+	<update id="updateScoreDetailOk" parameterType="String">
+		update tb_task_user_score_detail set changeStatus='1',changeTime=now()
+		where cid=#{cid}
+	</update>
+	<update id="updateScoreDetailNo" parameterType="String">
+		update tb_task_user_score_detail set changeStatus='2',changeTime=now()
+		where cid=#{cid}
+	</update>
+	<!-- 提现失败 -->
+	<update id="updateCollectingStatusNo" parameterType="String">
+		update tb_task_user_score_collect_info set collectStatus='2',handleTime=now()
+		where id=#{cid}
+	</update>
+	<select id="getCollectByCid" parameterType="String" resultType="com.htjy.entity.TaskCollectModel">
+		select * from tb_task_user_score_collect_info where id=#{cid}
+	</select>
 </mapper>
  

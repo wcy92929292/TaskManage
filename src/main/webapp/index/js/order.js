@@ -17,7 +17,11 @@ $.ajax({
     data: {'status':status},//yi个id
     async: false,
     success: function (data) {
+    	$("#ding_d").html("");
     	console.log(data.result);
+    	if(data.result.length==0){
+    		$("#ding_d").html('<p style="text-align:center;color:#c5c5c5">没有任务</p>')
+    	}
     	for (var i = 0; i < data.result.length; i++) {
     		var time1 = getDateTimeStr(data.result[i].startTime);
     		var time2 = getDateTimeStr(data.result[i].endTime);
@@ -33,7 +37,7 @@ $.ajax({
         			'<a href="details.html?aid='+data.result[i].aid+'&sid='+data.result[i].sid+'">'+
     	    	        '<div class="sp_pr">'+
     	    	                '<div class="text_p">'+
-    	    	                    '<p>'+data.result[i].title+'</p>'+
+    	    	                    '<p>'+data.result[i].title+'('+getDateTimeStrDate(data.result[i].startTime)+')</p>'+
     	    	                    '<span class="yue" style="margin-top:1.286em;">领取时间：'+time1+'</span>'+
     	    	                    '<span class="yue" style="margin-top:1.286em;">过期时间：'+time2+'</span>'+
     	    	                '</div>'+

@@ -19,11 +19,20 @@
 	<select id="login" parameterType="String" resultType="com.htjy.entity.UserModel">
 		select * from tb_task_user where phone=#{phone} and password=#{password}
 	</select>
-	<insert id="addUserScore" parameterType="com.htjy.entity.UserModel">
+	<!--注册的时候，初始化积分0 -->
+	<insert id="addUserScore" parameterType="String">
 		INSERT INTO tb_task_user_score
 		(userId,score) 
 		VALUES 
 		(#{id},'0')
 	</insert>
+	<!-- getUserList 后台管理的获取用户列表 -->
+	<select id="getUserList" parameterType="String" resultType="com.htjy.entity.UserModel">
+		select * from tb_task_user u left join tb_task_user_score  s on u.id=s.userId
+	</select>
+	<!-- 用户总数 -->
+	<select id="getUserNum" parameterType="String" resultType="int">
+		select count(*) from tb_task_user u
+	</select>
 </mapper>
  

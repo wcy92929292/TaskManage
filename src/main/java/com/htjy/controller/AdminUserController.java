@@ -1,13 +1,11 @@
 package com.htjy.controller;
 
 import java.io.IOException;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,14 +13,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.google.gson.JsonObject;
 import com.htjy.entity.AdminUserInfo;
-import com.htjy.entity.ScoreModel;
-import com.htjy.enums.SessionAttributeNameEnum;
-import com.htjy.http.HttpRequestResultData;
 import com.htjy.service.AdminUserService;
+import com.htjy.util.HttpRequestResultData;
 
 /**
  * 
@@ -48,7 +42,6 @@ public class AdminUserController {
 			} else {
 				HttpSession session = request.getSession();
 				session.setAttribute("admin", adminUser);
-				session.setAttribute(SessionAttributeNameEnum.ADMIN_USER.getValue(), adminUser);
 				adminUser.setPassword(password);
 				result.setData(adminUser);
 			}
@@ -63,7 +56,6 @@ public class AdminUserController {
 	@RequestMapping(value = "logout.do", method = { RequestMethod.POST, RequestMethod.GET })
 	public void logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		HttpSession session = request.getSession();
-		session.removeAttribute(SessionAttributeNameEnum.ADMIN_USER.getValue());
 		session.removeAttribute("admin");
 		response.sendRedirect("../admin/login.html");
 	}

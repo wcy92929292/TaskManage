@@ -24,7 +24,9 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.htjy.dao.TaskDao;
+import com.htjy.entity.ScoreDetailModel;
 import com.htjy.entity.TaskApplyModel;
+import com.htjy.entity.TaskCollectModel;
 import com.htjy.entity.TaskModel;
 import com.htjy.entity.TaskScheduleModel;
 import com.htjy.entity.UserModel;
@@ -36,6 +38,7 @@ import com.htjy.util.ReadUrlUtil;
 @RequestMapping("/task")
 public class TaskController {
 	
+	private static SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd"); 
 	@Autowired TaskDao taskDao;
 	/**
 	 * 添加任务
@@ -56,6 +59,7 @@ public class TaskController {
     public JSONObject add(
     		@RequestParam("address") String address,
     		@RequestParam("location") String location,
+    		@RequestParam("lation") String lation,
     		@RequestParam("lockTime") String lockTime,
     		@RequestParam("remark") String remark,
     		@RequestParam("schedule") String schedule,//"2018-07-05 - 2018-07-13"
@@ -68,6 +72,7 @@ public class TaskController {
 		JSONObject obj = new JSONObject();
 		task.setAddress(address);
 		task.setLocation(location);
+		task.setLation(lation);
 		task.setLockTime(Integer.parseInt(lockTime));
 		task.setRemark(remark!=null?remark:"");
 		task.setScore(score!=null?Integer.parseInt(score):0);
@@ -191,22 +196,86 @@ public class TaskController {
 				obj.put("code", "2");
 				return obj;
 			}
-			String strLocation = "";
-			for (TaskModel task : listTodayList) {
-				strLocation = strLocation + task.getLocation()+"|";
+			Integer loop = listTodayList.size()/5;
+			Integer last = listTodayList.size()%5;
+			if(loop==0){//5个以内
+				String strLocation = "";
+				for (int i = 0; i < last; i++) {
+					strLocation = strLocation + listTodayList.get(i).getLation()+"|";
+				}
+				//strLocation类似 天安门|北京西站|上海滩 这种格式
+				strLocation = strLocation.equals("")? "":strLocation.substring(0, strLocation.length()-1);
+				//调用百度地图的距离接口
+				JSONObject o = ReadUrlUtil.readJsonFromUrl("http://api.map.baidu.com/direction/v1/routematrix?output=json&origins="+strLocation+"&destinations="+myAddress+"&ak=z1mGbIzrx8mkXmBl8Ik1Epyp"); 
+				JSONObject result = (JSONObject) o.get("result");
+				JSONArray element = (JSONArray) result.get("elements");
+				for (int j = 0; j < element.size(); j++) {
+					JSONObject ele = element.getJSONObject(j);
+					JSONObject distance = (JSONObject) ele.get("distance");
+					Integer dis = (int) distance.get("value");
+					listTodayList.get(j).setDistance(dis);
+				}
+			}else if(loop>0 &&last==0){//大于等于5，且为5的倍数
+				for (int i = 0; i < loop; i++) {
+					String strLocation = "";
+					strLocation = strLocation + listTodayList.get(i).getLation()+"|";
+					strLocation = strLocation + listTodayList.get(i+1).getLation()+"|";
+					strLocation = strLocation + listTodayList.get(i+2).getLation()+"|";
+					strLocation = strLocation + listTodayList.get(i+3).getLation()+"|";
+					strLocation = strLocation + listTodayList.get(i+4).getLation()+"|";
+					//strLocation类似 天安门|北京西站|上海滩 这种格式
+					strLocation = strLocation.equals("")? "":strLocation.substring(0, strLocation.length()-1);
+					//调用百度地图的距离接口
+					JSONObject o = ReadUrlUtil.readJsonFromUrl("http://api.map.baidu.com/direction/v1/routematrix?output=json&origins="+strLocation+"&destinations="+myAddress+"&ak=z1mGbIzrx8mkXmBl8Ik1Epyp"); 
+					JSONObject result = (JSONObject) o.get("result");
+					JSONArray element = (JSONArray) result.get("elements");
+					for (int j = 0; j < element.size(); j++) {
+						JSONObject ele = element.getJSONObject(j);
+						JSONObject distance = (JSONObject) ele.get("distance");
+						Integer dis = (int) distance.get("value");
+						listTodayList.get(5*i+j).setDistance(dis);
+					}
+				}
+			}else if(loop>0 &&last>0){//大于5，不是5的倍数
+				for (int i = 0; i < loop; i++) {
+					String strLocation = "";
+					strLocation = strLocation + listTodayList.get(i).getLation()+"|";
+					strLocation = strLocation + listTodayList.get(i+1).getLation()+"|";
+					strLocation = strLocation + listTodayList.get(i+2).getLation()+"|";
+					strLocation = strLocation + listTodayList.get(i+3).getLation()+"|";
+					strLocation = strLocation + listTodayList.get(i+4).getLation()+"|";
+					//strLocation类似 天安门|北京西站|上海滩 这种格式
+					strLocation = strLocation.equals("")? "":strLocation.substring(0, strLocation.length()-1);
+					//调用百度地图的距离接口
+					JSONObject o = ReadUrlUtil.readJsonFromUrl("http://api.map.baidu.com/direction/v1/routematrix?output=json&origins="+strLocation+"&destinations="+myAddress+"&ak=z1mGbIzrx8mkXmBl8Ik1Epyp"); 
+					JSONObject result = (JSONObject) o.get("result");
+					JSONArray element = (JSONArray) result.get("elements");
+					for (int j = 0; j < element.size(); j++) {
+						JSONObject ele = element.getJSONObject(j);
+						JSONObject distance = (JSONObject) ele.get("distance");
+						Integer dis = (int) distance.get("value");
+						listTodayList.get(5*i+j).setDistance(dis);
+					}
+				}
+				String strLocation = "";
+				for (int i = 0; i < last; i++) {
+					strLocation = strLocation + listTodayList.get(i).getLation()+"|";
+				}
+				//strLocation类似 天安门|北京西站|上海滩 这种格式
+				strLocation = strLocation.equals("")? "":strLocation.substring(0, strLocation.length()-1);
+				//调用百度地图的距离接口
+				JSONObject o = ReadUrlUtil.readJsonFromUrl("http://api.map.baidu.com/direction/v1/routematrix?output=json&origins="+strLocation+"&destinations="+myAddress+"&ak=z1mGbIzrx8mkXmBl8Ik1Epyp"); 
+				JSONObject result = (JSONObject) o.get("result");
+				JSONArray element = (JSONArray) result.get("elements");
+				for (int j = 0; j < element.size(); j++) {
+					JSONObject ele = element.getJSONObject(j);
+					JSONObject distance = (JSONObject) ele.get("distance");
+					Integer dis = (int) distance.get("value");
+					listTodayList.get(5*loop+j).setDistance(dis);
+				}
 			}
-			//strLocation类似 天安门|北京西站|上海滩 这种格式
-			strLocation = strLocation.equals("")? "":strLocation.substring(0, strLocation.length()-1);
-			//调用百度地图的距离接口
-			JSONObject o = ReadUrlUtil.readJsonFromUrl("http://api.map.baidu.com/direction/v1/routematrix?output=json&origins="+strLocation+"&destinations="+myAddress+"&ak=z1mGbIzrx8mkXmBl8Ik1Epyp"); 
-			JSONObject result = (JSONObject) o.get("result");
-			JSONArray element = (JSONArray) result.get("elements");
-			for (int i = 0; i < element.size(); i++) {
-				JSONObject ele = element.getJSONObject(i);
-				JSONObject distance = (JSONObject) ele.get("distance");
-				Integer dis = (int) distance.get("value");
-				listTodayList.get(i).setDistance(dis);
-			}
+			
+			
 			if(flag.equals("2")){//按distance排序
 				Comparator comp = new ComparatorImpl();
 				Collections.sort(listTodayList, comp);
@@ -268,6 +337,7 @@ public class TaskController {
 		apply.setStatus(0);
 		taskDao.acceptTask(apply);
 		Integer tid = apply.getAid();//获取记录的id
+		taskDao.updateAvail(tid);//该任务其他状态都不可用
 		JSONObject o = new JSONObject();
 		o.put("code", "0");
 		o.put("result", tid);
@@ -308,11 +378,11 @@ public class TaskController {
 	@RequestMapping("/getTaskingDetail.do")
 	@ResponseBody
 	public JSONObject getTaskingDetail(
-			@RequestParam("sid")String sid,
+			@RequestParam("aid")String aid,
 			HttpServletRequest request, HttpServletResponse response, HttpSession session){
 		JSONObject o = new JSONObject();
 		UserModel u = (UserModel)session.getAttribute("user");
-		TaskModel t = taskDao.getTaskingDetail(sid,u.getId()+"");
+		TaskModel t = taskDao.getTaskingDetail(aid,u.getId()+"");
 		o.put("code", "0");
 		o.put("result", t);
 		return o;
@@ -359,6 +429,10 @@ public class TaskController {
 	public JSONObject updateTaskingStatusOk(@RequestParam("aid")String aid){
 		JSONObject obj = new JSONObject();
 		taskDao.updateTaskingStatusOk(aid);
+		Integer userId = taskDao.getUserIdByAid(aid);//根据aid找到userid
+		Integer score = taskDao.getTaskScore(userId+"",aid);//根据userid，aid获取分数
+		taskDao.addSbScore(userId,score,(Integer)0,(Integer)1,null);//加分
+		taskDao.updateSbScore(userId,score);//更新分
 		obj.put("code", 0);
 		return obj;
 	}
@@ -372,6 +446,188 @@ public class TaskController {
 	public JSONObject updateTaskingStatusNo(@RequestParam("aid")String aid){
 		JSONObject obj = new JSONObject();
 		taskDao.updateTaskingStatusNo(aid);
+		obj.put("code", 0);
+		return obj;
+	}
+	
+	/**
+	 * 总任务数
+	 * @return
+	 */
+	@RequestMapping("/getTaskNum.do")
+	@ResponseBody
+	public JSONObject getTaskNum(){
+		JSONObject obj = new JSONObject();
+		Integer num = taskDao.getTaskNum();
+		obj.put("code", 0);
+		obj.put("result", num);
+		return obj;
+	}
+	/**
+	 * 总任务数
+	 * @return
+	 */
+	@RequestMapping("/getCheckingTaskNum.do")
+	@ResponseBody
+	public JSONObject getCheckingTaskNum(){
+		JSONObject obj = new JSONObject();
+		Integer num = taskDao.getCheckingTaskNum();
+		obj.put("code", 0);
+		obj.put("result", num);
+		return obj;
+	}
+	/**
+	 * 今日总任务数
+	 * @return
+	 */
+	@RequestMapping("/getTodayTaskNum.do")
+	@ResponseBody
+	public JSONObject getTodayTaskNum(){
+		JSONObject obj = new JSONObject();
+		String strDate = formatter.format(new Date());
+		Integer num = taskDao.getTodayTaskNum(strDate);
+		obj.put("code", 0);
+		obj.put("result", num);
+		return obj;
+	}
+	/**
+	 * 获取分数的详细流水
+	 * @param request
+	 * @param response
+	 * @param session
+	 * @return
+	 */
+	@RequestMapping("/getScoreDetails.do")
+	@ResponseBody
+	public JSONObject getScoreDetails(HttpServletRequest request, HttpServletResponse response, HttpSession session){
+		JSONObject obj = new JSONObject();
+		UserModel u= (UserModel) session.getAttribute("user");
+		List<ScoreDetailModel> list = taskDao.getScoreDetails(u.getId());
+		obj.put("code", 0);
+		obj.put("result", list);
+		return obj;
+	}
+	/**
+	 * 获取用户的分数
+	 * @param request
+	 * @param response
+	 * @param session
+	 * @return
+	 */
+	@RequestMapping("/getUserScore.do")
+	@ResponseBody
+	public JSONObject getUserScore(HttpServletRequest request, HttpServletResponse response, HttpSession session){
+		JSONObject obj = new JSONObject();
+		UserModel u= (UserModel) session.getAttribute("user");
+		Integer score = taskDao.getUserScore(u.getId());
+		UserModel user = taskDao.getMyBank(u.getId());
+		obj.put("code", 0);
+		obj.put("result", score);
+		obj.put("user", user);
+		return obj;
+	}
+	/**
+	 * 更改这个人的银行和卡号
+	 * @param bank
+	 * @param number
+	 * @param request
+	 * @param response
+	 * @param session
+	 * @return
+	 */
+	@RequestMapping("/updateBank.do")
+	@ResponseBody
+	public JSONObject updateBank(
+			@RequestParam("bank")String bank,@RequestParam("number")String number,
+			HttpServletRequest request, HttpServletResponse response, HttpSession session){
+		JSONObject obj = new JSONObject();
+		UserModel u= (UserModel) session.getAttribute("user");
+		taskDao.updateBank(u.getId()+"",bank,number);
+		obj.put("code", "0");
+		return obj;
+	}
+	/**
+	 * 获取我最新的银行，其他所有信息
+	 * @param request
+	 * @param response
+	 * @param session
+	 * @return
+	 */
+	@RequestMapping("/getMyBank.do")
+	@ResponseBody
+	public JSONObject getMyBank(HttpServletRequest request, HttpServletResponse response, HttpSession session){
+		JSONObject obj = new JSONObject();
+		UserModel u= (UserModel) session.getAttribute("user");
+		UserModel user = taskDao.getMyBank(u.getId());
+		obj.put("code", "0");
+		obj.put("result", user);
+		return obj;
+	}
+	/**
+	 * 提现 （类型，钱）
+	 * @param type
+	 * @param money
+	 * @param request
+	 * @param response
+	 * @param session
+	 * @return
+	 */
+	@RequestMapping("/collectScore.do")
+	@ResponseBody
+	public JSONObject collectScore(
+			@RequestParam("type")String type,@RequestParam("money")String money,
+			HttpServletRequest request, HttpServletResponse response, HttpSession session){
+				
+		JSONObject obj = new JSONObject();
+		UserModel u= (UserModel) session.getAttribute("user");
+		TaskCollectModel c = new TaskCollectModel();
+		c.setUserId(u.getId());
+		c.setCollectType(type);
+		c.setCollectScore((int)Double.parseDouble(money)*1);
+		taskDao.insertCollectScore(c);
+		int cid = c.getCid();
+		System.out.println(cid);
+		taskDao.updateSbScore(u.getId(), -(int)Double.parseDouble(money)*1);
+		taskDao.addSbScore(u.getId(), -(int)Double.parseDouble(money)*1,(Integer)1,(Integer)0,(Integer)cid);
+		obj.put("code", "0");
+		return obj;
+	}
+	/**
+	 * 提现审核的列表
+	 * @return
+	 */
+	@RequestMapping("/getApplyCollectionList.do")
+	@ResponseBody
+	public JSONObject getApplyCollectionList(){
+		JSONObject obj = new JSONObject();
+		List<TaskCollectModel> t = taskDao.getApplyCollectionList();
+		obj.put("code", "0");
+		obj.put("result", t);
+		return obj;
+	}
+	/**
+	 * 提现审核成功
+	 */
+	@RequestMapping("/updateCollectingStatusOk.do")
+	@ResponseBody
+	public JSONObject updateCollectingStatusOk(@RequestParam("cid")String cid){
+		JSONObject obj = new JSONObject();
+		taskDao.updateCollectingStatusOk(cid);
+		taskDao.updateScoreDetailOk(cid);
+		obj.put("code", 0);
+		return obj;
+	}
+	/**
+	 * 提现审核失败
+	 */
+	@RequestMapping("/updateCollectingStatusNo.do")
+	@ResponseBody
+	public JSONObject updateCollectingStatusNo(@RequestParam("cid")String cid){
+		JSONObject obj = new JSONObject();
+		taskDao.updateCollectingStatusNo(cid);
+		TaskCollectModel c = taskDao.getCollectByCid(cid);//根据cid找到collect
+		taskDao.updateSbScore(c.getUserId(),c.getCollectScore());//更新分
+		taskDao.updateScoreDetailNo(cid);
 		obj.put("code", 0);
 		return obj;
 	}

@@ -189,6 +189,23 @@ function getDateTimeStr(date){
     ss = ss.length >1? ss:"0"+ss;
     return y+"-"+m+"-"+d+" "+hh+":"+mm+":"+ss;
 }
+
+//毫秒数转日期时间
+function getDateTimeStrDate(date){
+    var temp = new Date(date);
+    var y = temp.getFullYear();
+    var m = (temp.getMonth()+1)+"";
+    m = m.length >1? m:"0"+m;
+    var d = temp.getDate()+"";
+    d = d.length >1? d:"0"+d;
+    var hh = temp.getHours()+"";
+    hh = hh.length >1? hh:"0"+hh;
+    var mm = temp.getMinutes()+"";
+    mm = mm.length >1? mm:"0"+mm;
+    var ss = temp.getSeconds()+"";
+    ss = ss.length >1? ss:"0"+ss;
+    return y+"-"+m+"-"+d;
+}
 /**
  * 时间段翻译
  * @param a
@@ -207,7 +224,10 @@ function tranStatus(a){
 		status="已完成";
 		break;
 	case 3:
-		status="已失败";
+		status="审核失败";
+		break;
+	case 4:
+		status="过期失败";
 		break;
 	default:
 		break;
@@ -223,18 +243,43 @@ function tranStatus(a){
 function tranPeriod(a){
 	var period="";
 	switch (a) {
-	case 1:
+	case 0:
 		period="30分钟";
 		break;
-	case 2:
+	case 1:
 		period="1小时";
 		break;
-	case 3:
+	case 2:
 		period="2小时";
 		break;
 	default:
 		break;
 	}
 	return period;
+	
+}
+function transScoreStatus(a){
+	var status="";
+	switch (a) {
+	case 0:
+		status="完成任务";
+		break;
+	case 1:
+		status="提现";
+		break;
+	default:
+		break;
+	}
+	return status;
+}
+
+function transScoreChange(a){
+	var status="";
+	if(a>0){
+		status = "+"+a;
+	}else{
+		status = ""+a
+	}
+	return status;
 	
 }

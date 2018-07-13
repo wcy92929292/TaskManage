@@ -16,6 +16,7 @@ public class TaskModel extends TaskApplyModel{
 	private Integer lockTime;
 	private Integer score;
 	private String location;//大致地标
+	private String lation;//搜索位置对应的坐标
 	private String address;//具体位置
 	private String schedule;
 	private String remark;
@@ -108,6 +109,12 @@ public class TaskModel extends TaskApplyModel{
 	}
 	public void setRemark(String remark) {
 		this.remark = remark;
+	}
+	public String getLation() {
+		return lation;
+	}
+	public void setLation(String lation) {
+		this.lation = lation;
 	}
 
 

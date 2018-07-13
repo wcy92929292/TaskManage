@@ -1,5 +1,7 @@
 package com.htjy.dao;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 
 import com.htjy.entity.UserModel;
@@ -13,5 +15,7 @@ public interface UserDao {
 	UserModel login(@Param("phone")String phone, @Param("password")String password);
 
 	void addUserScore(@Param("id")String string);
+
+	List<UserModel> getUserList();
 
 }

@@ -40,3 +40,56 @@ function getDateTimeStr(date){
     ss = ss.length >1? ss:"0"+ss;
     return y+"-"+m+"-"+d+" "+hh+":"+mm+":"+ss;
 }
+
+function transNameStatus(s){
+	var name="";
+	switch (s) {
+	case "0":
+		name="未实名";
+		break;
+	case "1":
+		name="已实名";
+		break;
+	default:
+		break;
+	}
+	return name;
+}
+function transCStatus(s){
+	var name="";
+	switch (s) {
+	case "0":
+		name="待审核";
+		break;
+	case "1":
+		name="审核通过";
+		break;
+	case "2":
+		name="审核失败";
+		break;
+	default:
+		break;
+	}
+	return name;
+}
+
+function transStatus(s){
+	var name="";
+	switch (s) {
+	case 1:
+		name="待审核";
+		break;
+	case 2:
+		name="审核通过";
+		break;
+	case 3:
+		name="审核失败";
+		break;
+	case 4:
+		name="过期失败";
+		break;
+	default:
+		break;
+	}
+	return name;
+}

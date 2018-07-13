@@ -27,6 +27,7 @@ layui.config({
 	        		$('input[name="type"]').val(data.result.type);
 	        		$('input[name="score"]').val(data.result.score);
 	        		$('input[name="location"]').val(data.result.location);
+	        		$('input[name="lation"]').val(data.result.lation);
 	        		$('input[name="address"]').val(data.result.address);
 	        		$('textarea[name="remark"]').val(data.result.remark);
 	        		$('input[name="schedule"]').val(data.result.schedule);
@@ -125,6 +126,15 @@ layui.config({
             var _value = e.item.value;
             checkValue = _value.province + _value.city + _value.district + _value.street + _value.business;
             G(searchResultPanel).innerHTML = "onconfirm<br />index = " + e.item.index + "<br />myValue = " + checkValue;
+            var myGeo = new BMap.Geocoder();
+        	// 将地址解析结果显示在地图上,并调整地图视野
+        	myGeo.getPoint($("#location").val(), function(point){
+        		if (point) {
+        			$("input[name=lation]").val(point.lat+","+point.lng);
+        		}else{
+        			$("input[name=lation]").val("您选择地址没有解析到结果!");
+        		}
+        	});
         });
     }
 })

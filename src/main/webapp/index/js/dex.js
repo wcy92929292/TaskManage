@@ -10,6 +10,10 @@ function taskList(address,flag){
         	$(".product").html("");
         	if (data.code == "0") {
 //        		alert(data.result);
+        		if(data.result.length==0){
+        			$(".product").html('<p style="text-align:center;color:#c5c5c5">没有可接任务</p>');
+        			return false;
+        		}
         		for (var int = 0; int < data.result.length; int++) {
 					$(".product").append(
 					'<a href="business.html?id='+data.result[int].id+'&distance='+data.result[int].distance+'">'+

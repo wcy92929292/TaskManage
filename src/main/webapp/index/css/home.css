@@ -36,8 +36,8 @@ body{ background:#ececec;}
 .product{ background:#fff; margin-top:0.1em; margin-bottom:5.571em;}
 .sp_pr{ padding:1em; border-bottom:1px solid #ececec; overflow:hidden;}
 .sp_pr img{ width:88px; height:82px; margin-right:1em; float:left;}
-.text_p{ float:left;}
-.text_p p{ font-size:1.172em; color:#333; margin-bottom:0; font-weight:600;}
+.text_p{ float:left;width:18em;}
+.text_p p{ font-size:1.172em; color:#333; margin-bottom:0; font-weight:600;width:18em;}
 .xing{ overflow:hidden;}
 .xing span{ font-size:0.857em; color:#fe6e12; margin-right:0.286em;}
 .yue{ font-size:0.857em; color:#888; display:block; margin-top:0.286em;}

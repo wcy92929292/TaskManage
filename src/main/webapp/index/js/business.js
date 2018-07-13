@@ -19,17 +19,23 @@ $.ajax({
 })
 
 $("#accept").click(function(){
-	$.ajax({
-        type: 'POST',
-        url: '../task/acceptTask.do',
-        dataType: 'json',
-        data: {'id':GetQueryString("id"),'period':$("#lockTime").text()},//yi个id
-        async: false,
-        success: function (data) { 
-        	if(data.code=="0"){
-        		alert("接受成功，马上去完成吧！");
-        		location.href="apply1.html?id="+data.result;
-        	}
-        }
-})
+	if($('#yes').is(':checked')){
+		$.ajax({
+	        type: 'POST',
+	        url: '../task/acceptTask.do',
+	        dataType: 'json',
+	        data: {'id':GetQueryString("id"),'period':$("#lockTime").text()},//yi个id
+	        async: false,
+	        success: function (data) { 
+	        	if(data.code=="0"){
+	        		alert("接受成功，马上去完成吧！");
+	        		location.href="apply1.html?aid="+data.result;
+	        	}
+	        }
+		})
+	}else{
+		alert("请阅读完，勾选同意并继续！");
+		return false;
+	}
+	
 })

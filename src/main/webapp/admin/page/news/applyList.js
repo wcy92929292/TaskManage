@@ -8,7 +8,7 @@ layui.config({
 
 	//加载页面数据
 	var newsData = '';
-	$.get("../../json/newsListToday.json", function(data){
+	$.get("../../../task/getApplyCollectionList.do", function(data){
 		var newArray = [];
 		//单击首页“待审核文章”加载的信息
 		if($(".top_tab li.layui-this cite",parent.document).text() == "待审核文章"){
@@ -26,7 +26,7 @@ layui.config({
         	newsData = newArray;
         	newsList(newsData);
 		}else{    //正常加载信息
-			newsData = data;
+			newsData = data.result;
 			if(window.sessionStorage.getItem("addNews")){
 				var addNews = window.sessionStorage.getItem("addNews");
 				newsData = JSON.parse(addNews).concat(newsData);
@@ -141,31 +141,70 @@ layui.config({
 	})
 
 	//审核文章
-	$(".audit_btn").click(function(){
+	$(".audit_btn_ok").click(function(){
 		var $checkbox = $('.news_list tbody input[type="checkbox"][name="checked"]');
 		var $checked = $('.news_list tbody input[type="checkbox"][name="checked"]:checked');
 		if($checkbox.is(":checked")){
 			var index = layer.msg('审核中，请稍候',{icon: 16,time:false,shade:0.8});
             setTimeout(function(){
             	for(var j=0;j<$checked.length;j++){
-            		for(var i=0;i<newsData.length;i++){
-						if(newsData[i].newsId == $checked.eq(j).parents("tr").find(".news_del").attr("data-id")){
-							//修改列表中的文字
-							$checked.eq(j).parents("tr").find("td:eq(3)").text("审核通过").removeAttr("style");
-							//将选中状态删除
-							$checked.eq(j).parents("tr").find('input[type="checkbox"][name="checked"]').prop("checked",false);
-							form.render();
-						}
-					}
+            		var dataid = $checked.eq(j).parents("tr").find(".cid").attr("data-aid")
+            		$.ajax({
+				        type: 'POST',
+				        url: '../../../task/updateCollectingStatusOk.do',
+				        dataType: 'json',
+				        data: {'cid':dataid},//yi个id
+				        async: false,
+				        success: function (data) {
+				        	layer.close(index);
+				        	if(data.code=="0"){
+								layer.msg("审核成功");
+								parent.location.reload();
+				        	}else{
+				        		layer.msg("系统问题失败");
+				        	}
+				        	
+				        }
+            		})
             	}
-                layer.close(index);
-				layer.msg("审核成功");
             },2000);
 		}else{
 			layer.msg("请选择需要审核的文章");
 		}
 	})
 
+	//审核文章
+	$(".audit_btn_no").click(function(){
+		var $checkbox = $('.news_list tbody input[type="checkbox"][name="checked"]');
+		var $checked = $('.news_list tbody input[type="checkbox"][name="checked"]:checked');
+		if($checkbox.is(":checked")){
+			var index = layer.msg('审核中，请稍候',{icon: 16,time:false,shade:0.8});
+            setTimeout(function(){
+            	for(var j=0;j<$checked.length;j++){
+            		var dataid = $checked.eq(j).parents("tr").find(".cid").attr("data-aid")
+            		$.ajax({
+				        type: 'POST',
+				        url: '../../../task/updateCollectingStatusNo.do',
+				        dataType: 'json',
+				        data: {'cid':dataid},//yi个id
+				        async: false,
+				        success: function (data) {
+				        	layer.close(index);
+				        	if(data.code=="0"){
+								layer.msg("审核失败");
+								parent.location.reload();
+				        	}else{
+				        		layer.msg("系统问题失败");
+				        	}
+				        	
+				        }
+            		})
+            	}
+            },2000);
+		}else{
+			layer.msg("请选择需要审核的文章");
+		}
+	})
 	//批量删除
 	$(".batchDel").click(function(){
 		var $checkbox = $('.news_list tbody input[type="checkbox"][name="checked"]');
@@ -256,6 +295,7 @@ layui.config({
 	function newsList(that){
 		//渲染数据
 		function renderDate(data,curr){
+			console.log(data)
 			var dataHtml = '';
 			if(!that){
 				currData = newsData.concat().splice(curr*nums-nums, nums);
@@ -264,18 +304,30 @@ layui.config({
 			}
 			if(currData.length != 0){
 				for(var i=0;i<currData.length;i++){
+					var collectNumber="";
+					var collectT="";
+					if(currData[i].collectType=="0"){
+						collectT="支付宝";
+						collectNumber='<img style="width: 50px;" src="../../../upload/read.do?name='+currData[i].zhifubaoQrc+'" name="'+currData[i].zhifubaoQrc+'" onclick=biger(this)>';
+					}else if(currData[i].collectType=="1"){
+						collectT="微信";
+						collectNumber='<img style="width: 50px;" src="../../../upload/read.do?name='+currData[i].weixinQrc+'" name="'+currData[i].weixinQrc+'" onclick=biger(this)>';
+					}else if(currData[i].collectType=="2"){
+						collectT=currData[i].collectBank;
+						collectNumber=currData[i].collectAccount;
+					}
 					dataHtml += '<tr>'
 			    	+'<td><input type="checkbox" name="checked" lay-skin="primary" lay-filter="choose"></td>'
 //			    	+'<td align="left">'+currData[i].newsName+'</td>'
-			    	+'<td>'+currData[i].newsAuthor+'</td>'+'<td>'+currData[i].newsAccepter+'</td>'+'<td>'+currData[i].picture+'</td>';
-			    	if(currData[i].newsStatus == "待审核"){
-			    		dataHtml += '<td style="color:#f00">'+currData[i].newsStatus+'</td>';
+			    	+'<td>'+currData[i].loginName+'</td>'+'<td>'+currData[i].collectScore+'</td>'+'<td>'+collectT+'</td>'+'<td>'+collectNumber+'</td>';
+			    	if(currData[i].collectStatus == "0"){
+			    		dataHtml += '<td style="color:#f00">'+transCStatus(currData[i].collectStatus)+'</td>';
 			    	}else{
-			    		dataHtml += '<td>'+currData[i].newsStatus+'</td>';
+			    		dataHtml += '<td>'+transCStatus(currData[i].collectStatus)+'</td>';
 			    	}
 			    	dataHtml += //'<td>'+currData[i].newsLook+'</td>'+
 			    	//'<td><input type="checkbox" name="show" lay-skin="switch" lay-text="是|否" lay-filter="isShow"'+currData[i].isShow+'></td>'+
-			    	'<td>'+currData[i].newsTime+'</td>'+
+			    	'<td class="cid" data-aid="'+currData[i].cid+'">'+getDateTimeStr(currData[i].applyTime)+'</td>'+
 //			    	'<td>'
 //					+  '<a class="layui-btn layui-btn-mini news_edit"><i class="iconfont icon-edit"></i> 编辑</a>'
 //					+  '<a class="layui-btn layui-btn-danger layui-btn-mini news_del" data-id="'+data[i].newsId+'"><i class="layui-icon">&#xe640;</i> 删除</a>'
@@ -304,3 +356,22 @@ layui.config({
 		})
 	}
 })
+
+
+function biger(a){
+		layui.config({
+			base : "js/"
+		}).use(['form','layer','jquery','laypage'],function(){
+			var form = layui.form(),
+				layer = parent.layer === undefined ? layui.layer : parent.layer,
+				laypage = layui.laypage,
+				$ = layui.jquery;
+					var name = $(a).attr("name");
+					layer.open({
+						  type: 1, 
+						  maxWidth:'600px',
+						  offset: '50px',
+						  content: '<img style="width:600px;" src="../upload/read.do?name='+name+'">' //这里content是一个普通的String
+					});
+		})
+	}

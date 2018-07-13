@@ -14,9 +14,13 @@ public class UserModel {
 	private String phone;
 	private String address;
 	private String nameStatus;
-	private String collectType;
 	private String collectAccount;
+	private String collectBank;
+	private String zhifubaoQrc;
+	private String weixinQrc;
 	private String daytime;
+	
+	private Integer score;
 	public Integer getId() {
 		return id;
 	}
@@ -53,12 +57,6 @@ public class UserModel {
 	public void setNameStatus(String nameStatus) {
 		this.nameStatus = nameStatus;
 	}
-	public String getCollectType() {
-		return collectType;
-	}
-	public void setCollectType(String collectType) {
-		this.collectType = collectType;
-	}
 	public String getCollectAccount() {
 		return collectAccount;
 	}
@@ -71,6 +69,29 @@ public class UserModel {
 	public void setDaytime(String daytime) {
 		this.daytime = daytime;
 	}
-	
-	
+	public Integer getScore() {
+		return score;
+	}
+	public void setScore(Integer score) {
+		this.score = score;
+	}
+
+	public String getCollectBank() {
+		return collectBank;
+	}
+	public void setCollectBank(String collectBank) {
+		this.collectBank = collectBank;
+	}
+	public String getZhifubaoQrc() {
+		return zhifubaoQrc;
+	}
+	public void setZhifubaoQrc(String zhifubaoQrc) {
+		this.zhifubaoQrc = zhifubaoQrc;
+	}
+	public String getWeixinQrc() {
+		return weixinQrc;
+	}
+	public void setWeixinQrc(String weixinQrc) {
+		this.weixinQrc = weixinQrc;
+	}
 }

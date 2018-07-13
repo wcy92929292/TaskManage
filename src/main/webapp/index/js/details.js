@@ -1,9 +1,9 @@
-var sid = GetQueryString("sid");
+var sid = GetQueryString("aid");
 $.ajax({
         type: 'POST',
         url: '../task/getTaskingDetail.do',
         dataType: 'json',
-        data: {'sid':sid},//yi个id
+        data: {'aid':sid},//yi个id
         async: false,
         success: function (data) { 
         	console.log(data.result);
@@ -18,11 +18,20 @@ $.ajax({
         		$("#startTime").text(getDateTimeStr(data.result.startTime));
         		$("#endTime").text(getDateTimeStr(data.result.endTime));
         		$("#cancel").attr("aid",data.result.aid);
-        		if(data.result.status!=0){
+        		if(data.result.status==1 || data.result.status==2 ||data.result.status==3){
         			$("#material").show();
-        			$("#imgs").attr("src","../upload/read.do?name="+data.result.picture);
-        		}else{
+        			$("#stepNext").hide();
+        			var parr = data.result.picture.split(",");
+        			for (var i = 0; i < parr.length; i++) {
+        				$("#image").append('<img class="lit" id="imgs" src="../upload/read.do?name='+parr[i]+'">');
+					}
+//        			.attr("src","../upload/read.do?name="+data.result.picture);
+        		}else if(data.result.status==0){
         			$("#stepNext").show();
+        			$("#material").hide();
+        		}else if(data.result.status==4){
+        			$("#stepNext").hide();
+        			$("#material").hide();
         		}
         	}
         }

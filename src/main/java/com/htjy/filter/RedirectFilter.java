@@ -23,13 +23,21 @@ public class RedirectFilter implements Filter {
         String currentURL = request.getRequestURI();
         HttpSession session = request.getSession(false);  
         //根据indexOf原则，如果不包含login.html 则返回-1，业务上就要进行session判断处理
-        if (currentURL.indexOf("login.html")==-1) {
-//        	 if (session == null || session.getAttribute("user") == null) {  
-//        		 StringBuffer url = request.getRequestURL();  
-//                 response.sendRedirect(request.getContextPath() + "/login.html");  
-//                 return;  
-//             }  
+        if (currentURL.indexOf("login.html")==-1 && currentURL.indexOf("register.html")==-1&& currentURL.indexOf("/index/")!=-1) {
+        	 if (session==null ||session.getAttribute("user") == null) {  
+        		 StringBuffer url = request.getRequestURL();  
+                 response.sendRedirect(request.getContextPath() + "/index/login.html");  
+                 return;  
+             }
          }  
+        if (currentURL.indexOf("login.html")==-1 && currentURL.indexOf("/admin/")!=-1) {
+       	 if (session==null ||session.getAttribute("admin") == null) {  
+       		 StringBuffer url = request.getRequestURL();  
+                response.sendRedirect(request.getContextPath() + "/admin/login.html");  
+                return;  
+            }
+        }  
+        
         filterChain.doFilter(request, response);   
 	}
 	 public void init(FilterConfig filterConfig) throws ServletException {  

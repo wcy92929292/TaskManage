@@ -12,6 +12,7 @@ $("#register").click(function(){
         success: function (result) {
             if (result.code == 0) {
             	alert("成功");
+            	location.href="login.html";
             } else {
             	alert("失败");
                 /* layer.msg('获取失败！' + result.msg, {icon: 2, time: 1000}); */

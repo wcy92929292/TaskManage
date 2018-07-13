@@ -159,6 +159,7 @@ layui.config({
 				        	layer.close(index);
 				        	if(data.code=="0"){
 								layer.msg("审核成功");
+								parent.location.reload();
 				        	}else{
 				        		layer.msg("系统问题失败");
 				        	}
@@ -190,6 +191,7 @@ layui.config({
 				        	layer.close(index);
 				        	if(data.code=="0"){
 								layer.msg("审核失败");
+								parent.location.reload();
 				        	}else{
 				        		layer.msg("系统问题失败");
 				        	}
@@ -299,15 +301,25 @@ layui.config({
 				currData = that.concat().splice(curr*nums-nums, nums);
 			}
 			if(currData.length != 0){
+				console.log(currData)
 				for(var i=0;i<currData.length;i++){
+					var parr = currData[i].picture==null?[]:currData[i].picture.split(",");
+					var str ="";
+					for (var j = 0; j < parr.length; j++) {
+						str=str+'<img style="width: 50px;" src="../../../upload/read.do?name='+parr[j]+'" name="'+parr[j]+'" onclick=biger(this)>';
+					}
+//					<img style="width: 50px;" src="../../../upload/read.do?name='+currData[i].picture+'" name="'+currData[i].picture+'" onclick=biger(this)>
+					
 					dataHtml += '<tr>'
 			    	+'<td><input type="checkbox" name="checked" lay-skin="primary" lay-filter="choose"></td>'
 			    	+'<td align="left">'+currData[i].title+'</td>'
-			    	+'<td>admin</td>'+'<td>'+currData[i].loginName+'</td>'+'<td><img style="width: 50px;" src="../../../upload/read.do?name='+currData[i].picture+'" name="'+currData[i].picture+'" onclick=biger(this)> '+'</td>';
-			    	if(currData[i].newsStatus == "待审核"){
-			    		dataHtml += '<td style="color:#f00">'+currData[i].status+'</td>';
+			    	+'<td>admin</td>'+'<td>'+currData[i].loginName+'</td>'+'<td> '+str+'</td>';
+			    	if(currData[i].status == 1){
+			    		dataHtml += '<td style="color:#f00">'+transStatus(currData[i].status)+'</td>';
+			    	}else if(currData[i].status == 2){
+			    		dataHtml += '<td>'+transStatus(currData[i].status)+'</td>';
 			    	}else{
-			    		dataHtml += '<td>'+currData[i].status+'</td>';
+			    		dataHtml += '<td style="color:#f0f">'+transStatus(currData[i].status)+'</td>';
 			    	}
 			    	dataHtml += //'<td>'+currData[i].newsLook+'</td>'+
 			    	//'<td><input type="checkbox" name="show" lay-skin="switch" lay-text="是|否" lay-filter="isShow"'+currData[i].isShow+'></td>'+

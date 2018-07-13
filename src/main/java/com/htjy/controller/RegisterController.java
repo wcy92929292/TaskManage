@@ -1,6 +1,7 @@
 package com.htjy.controller;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,9 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
 import com.htjy.dao.UserDao;
-import com.htjy.entity.AdminUserInfo;
 import com.htjy.entity.UserModel;
-import com.htjy.enums.SessionAttributeNameEnum;
 import com.htjy.util.MobileMessageCheck;
 import com.htjy.util.MobileMessageSend;
 
@@ -163,5 +162,15 @@ public class RegisterController {
 		HttpSession session = request.getSession();
 		session.removeAttribute("user");
 		response.sendRedirect("../index/login.html");
+	}
+	
+	@ResponseBody
+	@RequestMapping("/getUserList.do")
+	public JSONObject getUserList(){
+		JSONObject obj = new JSONObject();
+		List<UserModel> ulist = userDao.getUserList();
+		obj.put("code", "0");
+		obj.put("result", ulist);
+		return obj;
 	}
 }

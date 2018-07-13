@@ -28,10 +28,10 @@
 			<a class="layui-btn recommend" style="background-color:#5FB878">推荐文章</a>
 		</div> -->
 		<div class="layui-inline">
-			<a class="layui-btn audit_btn">审核通过</a>
+			<a class="layui-btn audit_btn audit_btn_ok">审核通过</a>
 		</div>
 		<div class="layui-inline">
-			<a class="layui-btn audit_btn" style="background-color:#ec2f2f">审核失败</a>
+			<a class="layui-btn audit_btn audit_btn_no" style="background-color:#ec2f2f">审核失败</a>
 		</div>
 		<div class="layui-inline">
 			<a class="layui-btn layui-btn-danger batchDel">批量删除</a>
@@ -46,6 +46,7 @@
 				<col width="4%">
 				<col width="9%">
 				<col width="9%">
+				<col width="9%">
 				<!-- <col width="9%"> -->
 				<col width="9%">
 				<col width="9%">
@@ -57,6 +58,7 @@
 					<th><input type="checkbox" name="" lay-skin="primary" lay-filter="allChoose" id="allChoose"></th>
 					<th>申请人</th>
 					<th>应扣赏金</th>
+					<th>提现类型</th>
 					<th>提现账号</th>
 					<th>状态</th>
 					<th>提现时间</th>
@@ -68,6 +70,7 @@
 	</div>
 	<div id="page"></div>
 	<script type="text/javascript" src="../../layui/layui.js"></script>
+	<script type="text/javascript" src="../../js/common.js"></script>
 	<script type="text/javascript" src="applyList.js"></script>
 </body>
 </html>

@@ -25,53 +25,50 @@
 
 <div class="cong">
 	<div>
-	<div class="ka">
-	<input type="radio" name="sex" value='male' style="float: left;height: 46px;line-height: 32px;margin-left: 11px;"/>
-    	<div class="container">
-        	<a href="bank.html">
+	<div class="ka" id="yh">
+	<input type="radio" name="sex" value='2' style="float: left;height: 46px;line-height: 32px;margin-left: 11px;" checked="checked"/>
+    	<a href="bank.html">
+	    	<div class="container">
                 <div class="hao">
-                	<p>中国建设银行</p>
-                    <span>6222 1411 1524 5878 569</span>
+                	<p style="margin-top: 0.5em;">银行</p>
                 </div>
                 <i class="iconfont icon-jiantou"></i>
-            </a>
-        </div>
+	        </div>
+        </a>
     </div>
-    <div class="ka">
-    <input type="radio" name="sex" value='male' style="float: left;height: 46px;line-height: 32px;margin-left: 11px;"/>
-    	<div class="container">
-        	<a href="zhifubao.html">
-                <div class="hao">
-                	<p>支付宝</p>
-                    <span>11@qq.com</span>
-                </div>
-                <i class="iconfont icon-jiantou"></i>
-            </a>
-        </div>
+    <div class="ka" id="zfb">
+    <input type="radio" name="sex" value='0' style="float: left;height: 46px;line-height: 32px;margin-left: 11px;" />
+    	<a href="zhifubao.html">
+	    	<div class="container">
+	                <div class="hao">
+	                	<p style="margin-top: 0.5em;">支付宝二维码</p>
+	                </div>
+	                <i class="iconfont icon-jiantou"></i>
+	        </div>
+        </a>
     </div>
-    <div class="ka">
-    <input type="radio" name="sex" value='male' style="float: left;height: 46px;line-height: 32px;margin-left: 11px;"/>
-    	<div class="container">
-        	<a href="weixin.html">
-                <div class="hao">
-                	<p>微信</p>
-                    <span>11@qq.com</span>
-                </div>
-                <i class="iconfont icon-jiantou"></i>
-            </a>
-        </div>
+    <div class="ka" id="wx">
+    <input type="radio" name="sex" value='1' style="float: left;height: 46px;line-height: 32px;margin-left: 11px;"/>
+    	<a href="weixin.html">
+	    	<div class="container">
+	                <div class="hao">
+	                	<p style="margin-top: 0.5em;">微信二维码</p>
+	                </div>
+	                <i class="iconfont icon-jiantou"></i>
+	        </div>
+        </a>
     </div>
     </div>
-	<p>您的当前账户可用赏金：<em>2000</em></p>
-	<p>您的当前账户可用提现金额：<em>￥20.00</em></p>
+	<p>您的当前账户可用赏金：<em id="score1"></em></p>
+	<p>您的当前账户可用提现金额：<em id="score2"></em></p>
     <div class="zhi">
     	<div class="container">
         	<span>金额</span>
-            <input type="text" name="address" size="60" maxlength="60" style="color:#ccc" value="请输入您的提现金额" onfocus="if(this.value=='请输入您的提现金额'){this.value=''};this.style.color='black';" onblur="if(this.value==''||this.value=='请输入您的提现金额'){this.value='请输入您的提现金额';this.style.color='#ccc';}">
+            <input type="text" name="address" id="collectScore" size="60" maxlength="60" style="color:#ccc" value="请输入您的提现金额" onfocus="if(this.value=='请输入您的提现金额'){this.value=''};this.style.color='black';" onblur="if(this.value==''||this.value=='请输入您的提现金额'){this.value='请输入您的提现金额';this.style.color='#ccc';}">
         </div>
     </div>
     <div class="container">
-    	<a href="#" class="deng" style="margin-top:3em;">提 交</a>
+    	<a href="#" class="deng" style="margin-top:3em;" id="submit">提 交</a>
     </div>
 </div>
 
@@ -80,7 +77,7 @@
 <script src="js/jquery.min.js" type="text/javascript"></script>
 
 <script src="js/index.js" type="text/javascript"></script>
-
+<script src="js/withdrawals.js" type="text/javascript"></script>
 
 
 
