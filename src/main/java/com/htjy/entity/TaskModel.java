@@ -25,7 +25,11 @@ public class TaskModel extends TaskApplyModel{
 	private Integer updatePerson;
 	private Date updateTime;
 	private Integer distance;
+	private Integer scoreFlag;
 	
+	private Integer focusNum;//关注数
+	private String truePeriod;
+	private Integer photoNum;
 	public Integer getDistance() {
 		return distance;
 	}
@@ -115,6 +119,30 @@ public class TaskModel extends TaskApplyModel{
 	}
 	public void setLation(String lation) {
 		this.lation = lation;
+	}
+	public Integer getScoreFlag() {
+		return scoreFlag;
+	}
+	public void setScoreFlag(Integer scoreFlag) {
+		this.scoreFlag = scoreFlag;
+	}
+	public Integer getFocusNum() {
+		return focusNum;
+	}
+	public void setFocusNum(Integer focusNum) {
+		this.focusNum = focusNum;
+	}
+	public String getTruePeriod() {
+		return truePeriod;
+	}
+	public void setTruePeriod(String truePeriod) {
+		this.truePeriod = truePeriod;
+	}
+	public Integer getPhotoNum() {
+		return photoNum;
+	}
+	public void setPhotoNum(Integer photoNum) {
+		this.photoNum = photoNum;
 	}
 
 

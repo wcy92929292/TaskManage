@@ -19,6 +19,9 @@ public class TaskApplyModel extends UserModel{
 	private Date finishTime;
 	private Date checkTime;
 	private Integer checkPerson;
+	
+	private String photoAddr;
+	private String reason;
 
 	public Integer getAid() {
 		return aid;
@@ -79,6 +82,18 @@ public class TaskApplyModel extends UserModel{
 	}
 	public void setFinishTime(Date finishTime) {
 		this.finishTime = finishTime;
+	}
+	public String getPhotoAddr() {
+		return photoAddr;
+	}
+	public void setPhotoAddr(String photoAddr) {
+		this.photoAddr = photoAddr;
+	}
+	public String getReason() {
+		return reason;
+	}
+	public void setReason(String reason) {
+		this.reason = reason;
 	}
 	
 }

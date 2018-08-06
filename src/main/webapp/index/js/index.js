@@ -283,3 +283,53 @@ function transScoreChange(a){
 	return status;
 	
 }
+
+//判断当前浏览器是否支持WebSocket
+if ("WebSocket" in window)
+{
+   // 打开一个 web socket
+	
+   var ws = new WebSocket("ws://"+location.host+"/htjy-manager/newProduct/");
+	
+   //连接
+   ws.onopen = function()
+   {	
+      // Web Socket 已连接上，使用 send() 方法发送数据
+//      ws.sendAllMessage("我来啦！！!!!!!!!!");
+   };
+	
+   //接收到数据时触发
+   ws.onmessage = function (evt) 
+   { 
+	 console.log(evt);
+     var received_msg = evt.data;
+//     console.log(received_msg);
+     
+     alert(received_msg);
+   }
+   //关闭连接时触发
+   ws.onclose = function(){};
+}
+
+else{
+   // 浏览器不支持 WebSocket
+}
+
+function transReason(a){
+	var status="";
+	switch (a) {
+	case "0":
+		status="";
+		break;
+	case "1":
+		status="(图片不合格)";
+		break;
+	case "2":
+		status="(有人已经完成，自动过期)";
+		break;
+	default:
+		status="";
+		break;
+	}
+	return status;
+}

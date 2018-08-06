@@ -12,7 +12,7 @@ $("#submitQrc").click(function(){
 	    success: function (data) {
 //	        var rs = eval("("+data+")");
 	        if(data.code=="0"){
-	            alert('上传成功 等待审核！');
+	            alert('上传成功 !');
 	            location.href='withdrawals.html';
 	        }else{
 	        	alert('上传失败 重新进入上传！');

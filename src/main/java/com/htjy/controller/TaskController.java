@@ -7,7 +7,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -33,12 +36,19 @@ import com.htjy.entity.UserModel;
 import com.htjy.service.impl.ComparatorImpl;
 import com.htjy.util.DateUtils;
 import com.htjy.util.ReadUrlUtil;
+import com.htjy.websocket.CommonSocket;
 
 @Controller
 @RequestMapping("/task")
 public class TaskController {
 	
 	private static SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd"); 
+	private static String[] akbd= {"hNwsSIXFOPTIQQuze00VDuYydoIXgAFF","zbLsuDDL4CS2U0M4KezOZZbGUY9iWtVf","ZMtqRARPIk09nUpWnNKSmMPBVpwTvsci","Q0O9mkEqXfiLRRfVLUl7sHDZ","z1mGbIzrx8mkXmBl8Ik1Epyp"};
+//	hNwsSIXFOPTIQQuze00VDuYydoIXgAFF];
+//	zbLsuDDL4CS2U0M4KezOZZbGUY9iWtVf
+//	ZMtqRARPIk09nUpWnNKSmMPBVpwTvsci
+//	Q0O9mkEqXfiLRRfVLUl7sHDZ
+//	z1mGbIzrx8mkXmBl8Ik1Epyp
 	@Autowired TaskDao taskDao;
 	/**
 	 * 添加任务
@@ -184,18 +194,26 @@ public class TaskController {
 			@RequestParam("flag") String flag,
 			HttpServletRequest request, HttpServletResponse response, HttpSession session) throws JSONException, IOException{
 		UserModel u = (UserModel) session.getAttribute("user");
+		Integer uid = u==null ? null:u.getId();
 		JSONObject obj = new JSONObject();
-		if(u!=null){
+		Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+		if(true){
 			List<TaskModel> listTodayList = new ArrayList<TaskModel>();
 			if(flag.equals("1")){
-				listTodayList= taskDao.getTodayTaskList(u.getId());//这里是随机的顺序的任务列表
+				listTodayList= taskDao.getTodayTaskList(uid);//这里是随机的顺序的任务列表
+			}else if(flag.equals("3")){
+				listTodayList= taskDao.getTodayTaskListScore(uid);//这里是赏金的顺序的任务列表
+			}else if(flag.equals("5")){
+				listTodayList= taskDao.getTodayTaskListFocus(uid);
 			}else{
-				listTodayList= taskDao.getTodayTaskListScore(u.getId());//这里是赏金的顺序的任务列表
+				listTodayList= taskDao.getTodayTaskList(uid);//这里是随机的顺序的任务列表
 			}
 			if(listTodayList.size()==0){
 				obj.put("code", "2");
 				return obj;
 			}
+			if(map == null || session.getAttribute("jsOldIds")==null || session.getAttribute("myAddresss")==null||!session.getAttribute("jsOldIds").equals(session.getId())||!session.getAttribute("myAddresss").equals(myAddress)){
+
 			Integer loop = listTodayList.size()/5;
 			Integer last = listTodayList.size()%5;
 			if(loop==0){//5个以内
@@ -206,74 +224,103 @@ public class TaskController {
 				//strLocation类似 天安门|北京西站|上海滩 这种格式
 				strLocation = strLocation.equals("")? "":strLocation.substring(0, strLocation.length()-1);
 				//调用百度地图的距离接口
-				JSONObject o = ReadUrlUtil.readJsonFromUrl("http://api.map.baidu.com/direction/v1/routematrix?output=json&origins="+strLocation+"&destinations="+myAddress+"&ak=z1mGbIzrx8mkXmBl8Ik1Epyp"); 
+				JSONObject o = new JSONObject();
+				do {
+					o = ReadUrlUtil.readJsonFromUrl("http://api.map.baidu.com/direction/v1/routematrix?output=json&origins="+strLocation+"&destinations="+myAddress+"&ak="+akbd[(int) ((Math.random())*4)]); 
+				} while ((int)o.get("status")!=0);
 				JSONObject result = (JSONObject) o.get("result");
 				JSONArray element = (JSONArray) result.get("elements");
 				for (int j = 0; j < element.size(); j++) {
 					JSONObject ele = element.getJSONObject(j);
 					JSONObject distance = (JSONObject) ele.get("distance");
 					Integer dis = (int) distance.get("value");
-					listTodayList.get(j).setDistance(dis);
+//					listTodayList.get(j).setDistance(dis);
+					map.put(listTodayList.get(j).getId(), dis);
 				}
 			}else if(loop>0 &&last==0){//大于等于5，且为5的倍数
 				for (int i = 0; i < loop; i++) {
 					String strLocation = "";
-					strLocation = strLocation + listTodayList.get(i).getLation()+"|";
-					strLocation = strLocation + listTodayList.get(i+1).getLation()+"|";
-					strLocation = strLocation + listTodayList.get(i+2).getLation()+"|";
-					strLocation = strLocation + listTodayList.get(i+3).getLation()+"|";
-					strLocation = strLocation + listTodayList.get(i+4).getLation()+"|";
+					strLocation = strLocation + listTodayList.get(5*i).getLation()+"|";
+					strLocation = strLocation + listTodayList.get(5*i+1).getLation()+"|";
+					strLocation = strLocation + listTodayList.get(5*i+2).getLation()+"|";
+					strLocation = strLocation + listTodayList.get(5*i+3).getLation()+"|";
+					strLocation = strLocation + listTodayList.get(5*i+4).getLation()+"|";
 					//strLocation类似 天安门|北京西站|上海滩 这种格式
 					strLocation = strLocation.equals("")? "":strLocation.substring(0, strLocation.length()-1);
 					//调用百度地图的距离接口
-					JSONObject o = ReadUrlUtil.readJsonFromUrl("http://api.map.baidu.com/direction/v1/routematrix?output=json&origins="+strLocation+"&destinations="+myAddress+"&ak=z1mGbIzrx8mkXmBl8Ik1Epyp"); 
-					JSONObject result = (JSONObject) o.get("result");
+					JSONObject o = new JSONObject();
+					do {
+						o = ReadUrlUtil.readJsonFromUrl("http://api.map.baidu.com/direction/v1/routematrix?output=json&origins="+strLocation+"&destinations="+myAddress+"&ak="+akbd[(int) ((Math.random())*4)]); 
+					} while ((int)o.get("status")!=0);					JSONObject result = (JSONObject) o.get("result");
 					JSONArray element = (JSONArray) result.get("elements");
 					for (int j = 0; j < element.size(); j++) {
 						JSONObject ele = element.getJSONObject(j);
 						JSONObject distance = (JSONObject) ele.get("distance");
 						Integer dis = (int) distance.get("value");
-						listTodayList.get(5*i+j).setDistance(dis);
+//						listTodayList.get(5*i+j).setDistance(dis);
+						map.put(listTodayList.get(5*i+j).getId(), dis);
 					}
 				}
 			}else if(loop>0 &&last>0){//大于5，不是5的倍数
 				for (int i = 0; i < loop; i++) {
 					String strLocation = "";
-					strLocation = strLocation + listTodayList.get(i).getLation()+"|";
-					strLocation = strLocation + listTodayList.get(i+1).getLation()+"|";
-					strLocation = strLocation + listTodayList.get(i+2).getLation()+"|";
-					strLocation = strLocation + listTodayList.get(i+3).getLation()+"|";
-					strLocation = strLocation + listTodayList.get(i+4).getLation()+"|";
+					strLocation = strLocation + listTodayList.get(5*i).getLation()+"|";
+					strLocation = strLocation + listTodayList.get(5*i+1).getLation()+"|";
+					strLocation = strLocation + listTodayList.get(5*i+2).getLation()+"|";
+					strLocation = strLocation + listTodayList.get(5*i+3).getLation()+"|";
+					strLocation = strLocation + listTodayList.get(5*i+4).getLation()+"|";
 					//strLocation类似 天安门|北京西站|上海滩 这种格式
 					strLocation = strLocation.equals("")? "":strLocation.substring(0, strLocation.length()-1);
 					//调用百度地图的距离接口
-					JSONObject o = ReadUrlUtil.readJsonFromUrl("http://api.map.baidu.com/direction/v1/routematrix?output=json&origins="+strLocation+"&destinations="+myAddress+"&ak=z1mGbIzrx8mkXmBl8Ik1Epyp"); 
-					JSONObject result = (JSONObject) o.get("result");
+					JSONObject o = new JSONObject();
+					do {
+						o = ReadUrlUtil.readJsonFromUrl("http://api.map.baidu.com/direction/v1/routematrix?output=json&origins="+strLocation+"&destinations="+myAddress+"&ak="+akbd[(int) ((Math.random())*4)]); 
+					} while ((int)o.get("status")!=0);					JSONObject result = (JSONObject) o.get("result");
 					JSONArray element = (JSONArray) result.get("elements");
 					for (int j = 0; j < element.size(); j++) {
 						JSONObject ele = element.getJSONObject(j);
 						JSONObject distance = (JSONObject) ele.get("distance");
 						Integer dis = (int) distance.get("value");
-						listTodayList.get(5*i+j).setDistance(dis);
+//						listTodayList.get(5*i+j).setDistance(dis);
+						map.put(listTodayList.get(5*i+j).getId(), dis);
 					}
 				}
 				String strLocation = "";
 				for (int i = 0; i < last; i++) {
-					strLocation = strLocation + listTodayList.get(i).getLation()+"|";
+					strLocation = strLocation + listTodayList.get(5*loop+i).getLation()+"|";
 				}
 				//strLocation类似 天安门|北京西站|上海滩 这种格式
 				strLocation = strLocation.equals("")? "":strLocation.substring(0, strLocation.length()-1);
 				//调用百度地图的距离接口
-				JSONObject o = ReadUrlUtil.readJsonFromUrl("http://api.map.baidu.com/direction/v1/routematrix?output=json&origins="+strLocation+"&destinations="+myAddress+"&ak=z1mGbIzrx8mkXmBl8Ik1Epyp"); 
-				JSONObject result = (JSONObject) o.get("result");
+				JSONObject o = new JSONObject();
+				do {
+					o = ReadUrlUtil.readJsonFromUrl("http://api.map.baidu.com/direction/v1/routematrix?output=json&origins="+strLocation+"&destinations="+myAddress+"&ak="+akbd[(int) ((Math.random())*4)]); 
+				} while ((int)o.get("status")!=0);				JSONObject result = (JSONObject) o.get("result");
 				JSONArray element = (JSONArray) result.get("elements");
 				for (int j = 0; j < element.size(); j++) {
 					JSONObject ele = element.getJSONObject(j);
 					JSONObject distance = (JSONObject) ele.get("distance");
 					Integer dis = (int) distance.get("value");
-					listTodayList.get(5*loop+j).setDistance(dis);
+//					listTodayList.get(5*loop+j).setDistance(dis);
+					map.put(listTodayList.get(5*loop+j).getId(), dis);
 				}
 			}
+			for (Iterator iterator = listTodayList.iterator(); iterator.hasNext();) {
+				TaskModel taskModel = (TaskModel) iterator.next();
+				Integer ttid = taskModel.getId();
+				taskModel.setDistance(map.get(ttid));
+			}
+			session.setAttribute("jsOldIds", session.getId());
+			session.setAttribute("oldMaps", map);
+			session.setAttribute("myAddresss", myAddress);
+		}else{
+			map = (Map<Integer, Integer>) session.getAttribute("oldMaps");
+			for (Iterator iterator = listTodayList.iterator(); iterator.hasNext();) {
+				TaskModel taskModel = (TaskModel) iterator.next();
+				Integer ttid = taskModel.getId();
+				taskModel.setDistance(map.get(ttid));
+			}
+		}
 			
 			
 			if(flag.equals("2")){//按distance排序
@@ -282,6 +329,171 @@ public class TaskController {
 			}
 			obj.put("code", "0");
 			obj.put("result", listTodayList);
+			if(u!=null){
+				List<Integer> l = taskDao.getUserFocusList(u.getId());
+				obj.put("focus", l);
+			}
+		}
+		return obj;
+	}
+	
+	/**
+	 * 获取预告首页三个标签的不同tasklist
+	 * @param myAddress
+	 * @param flag
+	 * @param request
+	 * @param response
+	 * @param session
+	 * @return
+	 * @throws JSONException
+	 * @throws IOException
+	 */
+	@SuppressWarnings({ "unchecked", "unused" })
+	@RequestMapping("/getPreTaskList.do")
+	@ResponseBody
+	public JSONObject getPreTaskList(
+			@RequestParam("myAddress") String myAddress,
+			@RequestParam("flag") String flag,
+			HttpServletRequest request, HttpServletResponse response, HttpSession session) throws JSONException, IOException{
+		UserModel u = (UserModel) session.getAttribute("user");
+		Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+		JSONObject obj = new JSONObject();
+		if(true){
+			List<TaskModel> listTodayList = new ArrayList<TaskModel>();
+			if(flag.equals("1")){
+				listTodayList= taskDao.getPreTaskList(null);//这里是随机的顺序的任务列表
+			}else if(flag.equals("3")){
+				listTodayList= taskDao.getPreTaskListScore(null);//这里是赏金的顺序的任务列表
+			}else if (flag.equals("4")) {
+				listTodayList= taskDao.getPreTaskListDay(null);//这里是预告（时间）的顺序的任务列表
+			}else if (flag.equals("5")) {
+				listTodayList= taskDao.getPreTaskListFocus(null);//这里是关注度的顺序的任务列表
+			}else{
+				listTodayList= taskDao.getPreTaskList(null);//这里是随机的顺序的任务列表
+			}
+			if(listTodayList.size()==0){
+				obj.put("code", "2");
+				return obj;
+			}
+			if(map == null || session.getAttribute("jsOldId")==null || session.getAttribute("myAddress")==null||!session.getAttribute("jsOldId").equals(session.getId())||!session.getAttribute("myAddress").equals(myAddress)){
+				Integer loop = listTodayList.size()/5;
+				Integer last = listTodayList.size()%5;
+				if(loop==0){//5个以内
+					String strLocation = "";
+					for (int i = 0; i < last; i++) {
+						strLocation = strLocation + listTodayList.get(i).getLation()+"|";
+					}
+					//strLocation类似 天安门|北京西站|上海滩 这种格式
+					strLocation = strLocation.equals("")? "":strLocation.substring(0, strLocation.length()-1);
+					//调用百度地图的距离接口
+					JSONObject o = new JSONObject();
+					do {
+						o = ReadUrlUtil.readJsonFromUrl("http://api.map.baidu.com/direction/v1/routematrix?output=json&origins="+strLocation+"&destinations="+myAddress+"&ak="+akbd[(int) ((Math.random())*4)]); 
+					} while ((int)o.get("status")!=0);					JSONObject result = (JSONObject) o.get("result");
+					JSONArray element = (JSONArray) result.get("elements");
+					for (int j = 0; j < element.size(); j++) {
+						JSONObject ele = element.getJSONObject(j);
+						JSONObject distance = (JSONObject) ele.get("distance");
+						Integer dis = (int) distance.get("value");
+	//					listTodayList.get(j).setDistance(dis);
+						map.put(listTodayList.get(j).getId(), dis);
+					}
+				}else if(loop>0 &&last==0){//大于等于5，且为5的倍数
+					for (int i = 0; i < loop; i++) {
+						String strLocation = "";
+						strLocation = strLocation + listTodayList.get(5*i).getLation()+"|";
+						strLocation = strLocation + listTodayList.get(5*i+1).getLation()+"|";
+						strLocation = strLocation + listTodayList.get(5*i+2).getLation()+"|";
+						strLocation = strLocation + listTodayList.get(5*i+3).getLation()+"|";
+						strLocation = strLocation + listTodayList.get(5*i+4).getLation()+"|";
+						//strLocation类似 天安门|北京西站|上海滩 这种格式
+						strLocation = strLocation.equals("")? "":strLocation.substring(0, strLocation.length()-1);
+						//调用百度地图的距离接口
+						JSONObject o = new JSONObject();
+						do {
+							o = ReadUrlUtil.readJsonFromUrl("http://api.map.baidu.com/direction/v1/routematrix?output=json&origins="+strLocation+"&destinations="+myAddress+"&ak="+akbd[(int) ((Math.random())*4)]); 
+						} while ((int)o.get("status")!=0);						JSONObject result = (JSONObject) o.get("result");
+						JSONArray element = (JSONArray) result.get("elements");
+						for (int j = 0; j < element.size(); j++) {
+							JSONObject ele = element.getJSONObject(j);
+							JSONObject distance = (JSONObject) ele.get("distance");
+							Integer dis = (int) distance.get("value");
+	//						listTodayList.get(5*i+j).setDistance(dis);
+							map.put(listTodayList.get(5*i+j).getId(), dis);
+						}
+					}
+				}else if(loop>0 &&last>0){//大于5，不是5的倍数
+					for (int i = 0; i < loop; i++) {
+						String strLocation = "";
+						strLocation = strLocation + listTodayList.get(5*i).getLation()+"|";
+						strLocation = strLocation + listTodayList.get(5*i+1).getLation()+"|";
+						strLocation = strLocation + listTodayList.get(5*i+2).getLation()+"|";
+						strLocation = strLocation + listTodayList.get(5*i+3).getLation()+"|";
+						strLocation = strLocation + listTodayList.get(5*i+4).getLation()+"|";
+						//strLocation类似 天安门|北京西站|上海滩 这种格式
+						strLocation = strLocation.equals("")? "":strLocation.substring(0, strLocation.length()-1);
+						//调用百度地图的距离接口
+						JSONObject o = new JSONObject();
+						do {
+							o = ReadUrlUtil.readJsonFromUrl("http://api.map.baidu.com/direction/v1/routematrix?output=json&origins="+strLocation+"&destinations="+myAddress+"&ak="+akbd[(int) ((Math.random())*4)]); 
+						} while ((int)o.get("status")!=0);						
+						JSONObject result = (JSONObject) o.get("result");
+						JSONArray element = (JSONArray) result.get("elements");
+						for (int j = 0; j < element.size(); j++) {
+							JSONObject ele = element.getJSONObject(j);
+							JSONObject distance = (JSONObject) ele.get("distance");
+							Integer dis = (int) distance.get("value");
+	//						listTodayList.get(5*i+j).setDistance(dis);
+							map.put(listTodayList.get(5*i+j).getId(), dis);
+						}
+					}
+					String strLocation = "";
+					for (int i = 0; i < last; i++) {
+						strLocation = strLocation + listTodayList.get(5*loop+i).getLation()+"|";
+					}
+					//strLocation类似 天安门|北京西站|上海滩 这种格式
+					strLocation = strLocation.equals("")? "":strLocation.substring(0, strLocation.length()-1);
+					//调用百度地图的距离接口
+					JSONObject o = new JSONObject();
+					do {
+						o = ReadUrlUtil.readJsonFromUrl("http://api.map.baidu.com/direction/v1/routematrix?output=json&origins="+strLocation+"&destinations="+myAddress+"&ak="+akbd[(int) ((Math.random())*4)]); 
+					} while ((int)o.get("status")!=0);					JSONObject result = (JSONObject) o.get("result");
+					JSONArray element = (JSONArray) result.get("elements");
+					for (int j = 0; j < element.size(); j++) {
+						JSONObject ele = element.getJSONObject(j);
+						JSONObject distance = (JSONObject) ele.get("distance");
+						Integer dis = (int) distance.get("value");
+	//					listTodayList.get(5*loop+j).setDistance(dis);
+						map.put(listTodayList.get(5*loop+j).getId(), dis);
+					}
+				}
+				for (Iterator iterator = listTodayList.iterator(); iterator.hasNext();) {
+					TaskModel taskModel = (TaskModel) iterator.next();
+					Integer ttid = taskModel.getId();
+					taskModel.setDistance(map.get(ttid));
+				}
+				session.setAttribute("jsOldId", session.getId());
+				session.setAttribute("oldMap", map);
+				session.setAttribute("myAddress", myAddress);
+			}else{
+				map = (Map<Integer, Integer>) session.getAttribute("oldMap");
+				for (Iterator iterator = listTodayList.iterator(); iterator.hasNext();) {
+					TaskModel taskModel = (TaskModel) iterator.next();
+					Integer ttid = taskModel.getId();
+					taskModel.setDistance(map.get(ttid));
+				}
+			}
+			
+			if(flag.equals("2")){//按distance排序
+				Comparator comp = new ComparatorImpl();
+				Collections.sort(listTodayList, comp);
+			}
+			obj.put("code", "0");
+			obj.put("result", listTodayList);
+			if(u!=null){
+				List<Integer> l = taskDao.getUserFocusList(u.getId());
+				obj.put("focus", l);
+			}
 		}
 		return obj;
 	}
@@ -289,12 +501,24 @@ public class TaskController {
 	 * 获取可用任务的点击详细
 	 * @param id
 	 * @return
+	 * @throws IOException 
 	 */
 	@RequestMapping("/getTodayTaskDetail.do")
 	@ResponseBody
-	public JSONObject getTodayTaskDetail(@RequestParam("id")String id){
+	public JSONObject getTodayTaskDetail(
+			@RequestParam("id")String id,
+			HttpServletRequest request, 
+			HttpServletResponse response,
+			HttpSession session) throws IOException{
+		UserModel u = (UserModel) session.getAttribute("user");
 		TaskModel t = taskDao.getTodayTaskDetail(id);
 		JSONObject o = new JSONObject();
+		if(u!=null){
+			Integer cun = taskDao.queryTaskIdAndPerson(Integer.parseInt(id),u.getId());
+			if(cun>0){//如果已经领取过任务了
+			}
+			o.put("cun", cun);
+		}
 		o.put("code", "0");
 		o.put("result", t);
 		return o;
@@ -331,13 +555,15 @@ public class TaskController {
 			apply.setStartTime(new Date(currentTime));
 			currentTime +=120*60*1000;
 			apply.setEndTime(new Date(currentTime));
+		}else{
+			apply.setStartTime(new Date(currentTime));
 		}
 		apply.setSid(sid);
 		apply.setUserId(u.getId());
 		apply.setStatus(0);
 		taskDao.acceptTask(apply);
 		Integer tid = apply.getAid();//获取记录的id
-		taskDao.updateAvail(tid);//该任务其他状态都不可用
+//		taskDao.updateAvail(tid);//该任务其他状态都不可用
 		JSONObject o = new JSONObject();
 		o.put("code", "0");
 		o.put("result", tid);
@@ -429,10 +655,20 @@ public class TaskController {
 	public JSONObject updateTaskingStatusOk(@RequestParam("aid")String aid){
 		JSONObject obj = new JSONObject();
 		taskDao.updateTaskingStatusOk(aid);
+		taskDao.updateAvail(Integer.parseInt(aid));
 		Integer userId = taskDao.getUserIdByAid(aid);//根据aid找到userid
 		Integer score = taskDao.getTaskScore(userId+"",aid);//根据userid，aid获取分数
 		taskDao.addSbScore(userId,score,(Integer)0,(Integer)1,null);//加分
 		taskDao.updateSbScore(userId,score);//更新分
+//		taskDao.alert("您接受的任务已有人完成并审核通过，该任务已作废")
+		List<Integer> list = taskDao.queryMsgPeopleByAid(Integer.parseInt(aid));
+		CommonSocket.sendAllMessage("您接受的任务已有人完成并审核通过，该任务已作废，感谢参与!", list);
+		for (int i = 0; i < list.size(); i++) {
+			List<Integer> alist = taskDao.selectMsgSid(Integer.parseInt(aid));
+			taskDao.updateOtherScheduleStatus(list.get(i),alist);
+		}
+		Integer taskId = taskDao.queryTaskIdByAid(Integer.parseInt(aid));
+		taskDao.updateTaskAble(taskId);//关闭3三天，一阶段任务
 		obj.put("code", 0);
 		return obj;
 	}
@@ -629,6 +865,54 @@ public class TaskController {
 		taskDao.updateSbScore(c.getUserId(),c.getCollectScore());//更新分
 		taskDao.updateScoreDetailNo(cid);
 		obj.put("code", 0);
+		return obj;
+	}
+	
+	/**
+	 * 关注相关
+	 */
+	@RequestMapping("/focusPlus.do")
+	@ResponseBody
+	public JSONObject focusPlus(
+			@RequestParam("tid")Integer tid,
+			@RequestParam("flag")Integer flag,
+			HttpSession session){
+		JSONObject obj = new JSONObject();
+		UserModel u= (UserModel) session.getAttribute("user");
+		try {
+			if(flag==0){
+				taskDao.focusSbPlus(tid,u.getId());//增加某人关注
+				taskDao.focusTaskPlus(tid);//加分
+			}else{
+				taskDao.focusSbDiv(tid,u.getId());//删除某人
+				taskDao.focusTaskDiv(tid);//减分
+			}
+			obj.put("code", 0);
+		} catch (Exception e) {
+			// TODO: handle exception
+			obj.put("code", 1);
+		}
+		return obj;
+	}
+	/**
+	 * 获取拍照数量和标题
+	 * @param aid
+	 * @return
+	 */
+	
+	@RequestMapping("/getPhotoNumEtc.do")
+	@ResponseBody
+	public JSONObject getPhotoNumEtc(
+			@RequestParam("aid")Integer aid){
+		JSONObject obj = new JSONObject();
+		try {
+			TaskModel t = taskDao.getPhotoNumEtc(aid);//获取拍照数量和标题
+			obj.put("code", 0);
+			obj.put("result", t);
+		} catch (Exception e) {
+			// TODO: handle exception
+			obj.put("code", 1);
+		}
 		return obj;
 	}
 }

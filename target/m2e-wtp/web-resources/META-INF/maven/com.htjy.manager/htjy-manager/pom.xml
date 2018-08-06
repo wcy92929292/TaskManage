@@ -89,6 +89,7 @@
 			<artifactId>spring-test</artifactId>
 			<version>${spring.version}</version>
 		</dependency>
+		
 		<!-- spring核心包 end -->
 		<!-- Spring AOP 核心包 start -->
 		<dependency>

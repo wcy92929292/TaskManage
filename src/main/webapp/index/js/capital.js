@@ -6,6 +6,10 @@ $.ajax({
         success: function (data) { 
         	console.log(data.result);
         	if(data.code=="0"){
+        		if(data.result.length==0){
+        			$("#xi_m").html('<p style="text-align:center;color:#c5c5c5">没有记录</p>');
+        			return false;
+        		}
         		for (var i = 0; i < data.result.length; i++) {
         			var sta ="";
         			var scoreC ="";

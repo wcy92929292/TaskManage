@@ -128,6 +128,21 @@ layui.config({
 			})			
 			layui.layer.full(index);
 		})
+		$(".piAdd_btn").click(function(){
+			var index = layui.layer.open({
+				title : "批量添加任务",
+				type : 2,
+				content : "piAdd.html",
+				success : function(layero, index){
+					setTimeout(function(){
+						layui.layer.tips('点击此处返回任务列表', '.layui-layer-setwin .layui-layer-close', {
+							tips: 3
+						});
+					},500)
+				}
+			})			
+			layui.layer.full(index);
+		})
 	}).resize();
 
 //	$(window).one("resize",function(){

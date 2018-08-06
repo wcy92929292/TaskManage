@@ -8,6 +8,35 @@
 //    };
 //    fr.readAsDataURL(imgFile);
 //};
+$("#aid").val(GetQueryString("aid"));
+
+$.ajax({
+    type: 'POST',
+    url: '../task/getPhotoNumEtc.do',
+    dataType: 'json',
+    data: {'aid':GetQueryString("aid")},//yi个id
+    async: false,
+    success: function (data) {
+    	if(data.code=="0"){
+    		$("#title").text(data.result.title);
+    		$("#photoNum").text(data.result.photoNum);
+    	}
+    }
+})
+
+
+function onsubmit(){
+	if($("#image").length<$("#photoNum").text()){
+		alert("上传数量错误，请上传正确的图片数量，再提交！");
+		return false;
+	}
+//	document.getElementById("fm").submit();
+}
+var dd=0;
+$("#morePic").on("click",function(){
+	dd++;
+	$("#pp").append('<input style="float: left;" type="file" id="file'+dd+'"  name="file" accept="image/*" onchange="xmTanUploadImg(this)">')
+})
  //选择图片，马上预览  
     function xmTanUploadImg(obj) {
 
@@ -31,20 +60,23 @@
 
                 //限制上传的图片数
                 var a=$('#image>div').length;
-                if(a<5){
+                if(a<10){
                     ndiv.innerHTML=imgstr;
                     ndiv.className="lit";
                     oimgbox.appendChild(ndiv);
                 }else{
-                    alert('最多5张图片');
+                    alert('最多10张图片');
                 }
             }
             reader.readAsDataURL(file);
+            $("#shili").hide();
         }
 
     }
 
-$("#aid").val(GetQueryString("aid"));
+
+
+
 //$("#submit").click(function(){
 //	var formData = new FormData(); 
 //	if($('#file')[0].files[0]==null){

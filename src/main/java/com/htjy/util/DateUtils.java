@@ -33,4 +33,36 @@ public class DateUtils {
 		lDate.add(endDate);// 把结束时间加入集合
 		return lDate;
 	}
+	
+	public static List<Date> getDatesAfterDate(Date beginDate) {
+		List<Date> lDate = new ArrayList<Date>();
+		lDate.add(beginDate);// 把开始时间加入集合
+		Calendar cal = Calendar.getInstance();
+		// 使用给定的 Date 设置此 Calendar 的时间
+		cal.setTime(beginDate);
+		// 根据日历的规则，为给定的日历字段添加或减去指定的时间量
+		cal.add(Calendar.DAY_OF_MONTH, 1);
+		// 测试此日期是否在指定日期之后
+		lDate.add(cal.getTime());
+		cal.add(Calendar.DAY_OF_MONTH, 2);
+		// 测试此日期是否在指定日期之后
+		lDate.add(cal.getTime());
+		return lDate;
+	}
+	
+	public static List<Date> getDatesBeforeDate(Date endDate) {
+		List<Date> lDate = new ArrayList<Date>();
+		lDate.add(endDate);// 把开始时间加入集合
+		Calendar cal = Calendar.getInstance();
+		// 使用给定的 Date 设置此 Calendar 的时间
+		cal.setTime(endDate);
+		// 根据日历的规则，为给定的日历字段添加或减去指定的时间量
+		cal.add(Calendar.DAY_OF_MONTH, -1);
+		// 测试此日期是否在指定日期之后
+		lDate.add(cal.getTime());
+		cal.add(Calendar.DAY_OF_MONTH, -1);
+		// 测试此日期是否在指定日期之后
+		lDate.add(cal.getTime());
+		return lDate;
+	}
 }

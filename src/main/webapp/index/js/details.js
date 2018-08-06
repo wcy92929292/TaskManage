@@ -14,7 +14,7 @@ $.ajax({
         		$("#lockTime").text(tranPeriod(data.result.lockTime));
         		$("#address").text(data.result.location+"-"+data.result.address);
         		$("#remark").text(data.result.remark);
-        		$("#status").text(tranStatus(data.result.status));
+        		$("#status").text(tranStatus(data.result.status)+transReason(data.result.reason));
         		$("#startTime").text(getDateTimeStr(data.result.startTime));
         		$("#endTime").text(getDateTimeStr(data.result.endTime));
         		$("#cancel").attr("aid",data.result.aid);
@@ -25,6 +25,7 @@ $.ajax({
         			for (var i = 0; i < parr.length; i++) {
         				$("#image").append('<img class="lit" id="imgs" src="../upload/read.do?name='+parr[i]+'">');
 					}
+        			$("#addr").text(data.result.photoAddr);
 //        			.attr("src","../upload/read.do?name="+data.result.picture);
         		}else if(data.result.status==0){
         			$("#stepNext").show();
@@ -36,7 +37,7 @@ $.ajax({
         	}
         }
 })
-$(".liji").attr("href","apply1.html?aid="+GetQueryString("aid"));
+$(".liji").attr("href","applyTask.html?aid="+GetQueryString("aid"));
 $("#cancel").click(function(){
 	var aid = $(this).attr("aid");
 	$.ajax({

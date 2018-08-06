@@ -78,11 +78,12 @@ public interface TaskDao {
 	 */
 	TaskModel getTaskingDetail(@Param("aid")String aid, @Param("uid")String string);
 	/**
-	 * 做任务 传图片 更新状态
+	 * 做任务 传图片,传位置 更新状态
 	 * @param fileName
 	 * @param aid
+	 * @param ad 
 	 */
-	void updateTaskingStatus(@Param("fileName")String fileName, @Param("aid")String aid);
+	void updateTaskingStatus(@Param("fileName")String fileName, @Param("aid")String aid, @Param("ad")String ad);
 	/**
 	 * 取消任务
 	 * @param aid
@@ -195,6 +196,90 @@ public interface TaskDao {
 	 * @param cid
 	 */
 	void updateScoreDetailNo(@Param("cid")String cid);
+	/**
+	 * 是否有完全相同的任务已经录入
+	 * @param model
+	 * @return
+	 */
+	int queryRepeat(TaskModel model);
+	/**
+	 * 任务预告（即未上线任务）
+	 * @param integer
+	 * @return
+	 */
+	List<TaskModel> getPreTaskList(@Param("id")Integer integer);
 
+	List<TaskModel> getPreTaskListScore(@Param("id")Integer integer);
+	/**
+	 * 预告按时间顺序
+	 * @param object
+	 * @return
+	 */
+	List<TaskModel> getPreTaskListDay(Object object);
+	/**
+	 * 根据aid查询任务id再查询所有接收任务的人的id
+	 * @param aid
+	 * @return
+	 */
+	List<Integer> queryMsgPeopleByAid(@Param("aid")Integer aid);
+	/**
+	 * 别人完成后，其他人自动过期失败
+	 * @param integer
+	 * @param alist
+	 */
+	void updateOtherScheduleStatus(@Param("userId")Integer integer, @Param("sid")List<Integer> alist);
+	/**
+	 * 预告按热度顺序
+	 * @param object
+	 * @return
+	 */
+	List<TaskModel> getPreTaskListFocus(Object object);
+	/**
+	 * 今日任务按热度顺序
+	 * @param object
+	 * @return
+	 */
+	List<TaskModel> getTodayTaskListFocus(@Param("id")Integer integer);
+	/**
+	 * 后面四个为关注相关
+	 * @param tid
+	 * @param id
+	 */
+	void focusSbPlus(@Param("tid")Integer tid, @Param("userId")Integer id);//某人添加关注
+	void focusTaskPlus(@Param("tid")Integer tid);//任务增加关注数
+	void focusSbDiv(@Param("tid")Integer tid, @Param("userId")Integer id);//某人取消关注
+	void focusTaskDiv(@Param("tid")Integer tid);//任务减少关注数
+	/**
+	 * 获取登录用户下 关注的任务
+	 * @param id
+	 * @return
+	 */
+	List<Integer> getUserFocusList(@Param("userId")Integer id);
+
+	List<Integer> selectMsgSid(@Param("aid")int parseInt);
+	/**
+	 * 根据接收aid获取sid再获取tid
+	 * @param aid
+	 * @return
+	 */
+	Integer queryTaskIdByAid(@Param("aid")Integer aid);
+	/**
+	 * 关闭一个阶段的任务
+	 * @param taskId
+	 */
+	void updateTaskAble(@Param("tid")Integer taskId);
+	/**
+	 * 查询这个人是否接受了这个任务
+	 * @param parseInt
+	 * @param id
+	 * @return
+	 */
+	Integer queryTaskIdAndPerson(@Param("tid")Integer parseInt, @Param("userId")Integer id);
+	/**
+	 * 查询拍照数量和标题
+	 * @param aid
+	 * @return
+	 */
+	TaskModel getPhotoNumEtc(@Param("aid")Integer aid);
 
 }

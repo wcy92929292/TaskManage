@@ -161,7 +161,7 @@ public class RegisterController {
 	public void logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		HttpSession session = request.getSession();
 		session.removeAttribute("user");
-		response.sendRedirect("../index/login.html");
+		response.sendRedirect("../index/login.html?next=personal");
 	}
 	
 	@ResponseBody

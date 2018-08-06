@@ -9,10 +9,10 @@
 	    SELECT LAST_INSERT_ID() AS id 
 	    </selectKey>
 		INSERT INTO tb_task_info 
-		(title,type,location,address,lockTime,remark,schedule,score,setPerson,setTime) 
+		(title,type,location,address,lockTime,remark,schedule,score,setPerson,setTime,lation,truePeriod,photoNum) 
 		VALUES 
 		(#{title},#{type},#{location},#{address},#{lockTime},
-		#{remark},#{schedule},#{score},#{setPerson},now())
+		#{remark},#{schedule},#{score},#{setPerson},now(),#{lation},#{truePeriod},#{photoNum})
 	</insert>
 	<!-- 加任务排期表 -->
 	<insert id="addTaskSchedule">
@@ -51,19 +51,84 @@
 	</select>
 	<!-- 获取当前日期可用的任务 -->
 	<select id="getTodayTaskList" parameterType="Integer" resultType="com.htjy.entity.TaskModel">
-		SELECT i.* FROM tb_task_schedule_info s 
+		SELECT distinct i.* FROM tb_task_schedule_info s 
 		left JOIN tb_task_info i on i.id=s.tid
 		LEFT JOIN tb_task_apply_info a on a.sid=s.id
-		WHERE s.daytime= DATE_FORMAT(NOW(),'%Y-%m-%d') and (a.available is null or a.available='1')  and (a.status is null or a.status='3' or a.status='4')
+		WHERE s.daytime= DATE_FORMAT(NOW(),'%Y-%m-%d') and (a.available is null or a.available='1')  and (a.status is null or a.status!='2' )
+		<if test="id!=null">
+		and i.id not in(SELECT DISTINCT i.id FROM tb_task_schedule_info s 
+		left JOIN tb_task_info i on i.id=s.tid
+		LEFT JOIN tb_task_apply_info a on a.sid=s.id
+		WHERE s.daytime= DATE_FORMAT(NOW(),'%Y-%m-%d') and (a.available is null or a.available='1')  and (a.status is null or a.status!='2' )
+		and a.userId=#{id})
+		</if>
+		and i.able='1'
 	</select>
+	
 	<!-- 获取当前日期可用的任务（赏金排序）-->
 	<select id="getTodayTaskListScore" parameterType="Integer" resultType="com.htjy.entity.TaskModel">
-		SELECT i.* FROM tb_task_schedule_info s 
+		SELECT distinct i.* FROM tb_task_schedule_info s 
 		left JOIN tb_task_info i on i.id=s.tid
 		LEFT JOIN tb_task_apply_info a on a.sid=s.id
-		WHERE s.daytime=DATE_FORMAT(NOW(),'%Y-%m-%d') AND (a.available is null or a.available='1')   and (a.status is null or a.status='3' or a.status='4')
+		WHERE s.daytime=DATE_FORMAT(NOW(),'%Y-%m-%d') AND (a.available is null or a.available='1')   and (a.status is null or a.status!='2' )
+		<if test="id!=null">
+		and i.id not in(SELECT DISTINCT i.id FROM tb_task_schedule_info s 
+		left JOIN tb_task_info i on i.id=s.tid
+		LEFT JOIN tb_task_apply_info a on a.sid=s.id
+		WHERE s.daytime= DATE_FORMAT(NOW(),'%Y-%m-%d') and (a.available is null or a.available='1')  and (a.status is null or a.status!='2' )
+		and a.userId=#{id})
+		and i.able='1'
+		</if>
 		order by i.score desc
 	</select>
+	<select id="getTodayTaskListFocus" parameterType="Integer" resultType="com.htjy.entity.TaskModel">
+		SELECT distinct i.* FROM tb_task_schedule_info s 
+		left JOIN tb_task_info i on i.id=s.tid
+		LEFT JOIN tb_task_apply_info a on a.sid=s.id
+		WHERE s.daytime= DATE_FORMAT(NOW(),'%Y-%m-%d') and (a.available is null or a.available='1')  and (a.status is null or a.status!='2' )
+		<if test="id!=null">
+		and i.id not in(SELECT DISTINCT i.id FROM tb_task_schedule_info s 
+		left JOIN tb_task_info i on i.id=s.tid
+		LEFT JOIN tb_task_apply_info a on a.sid=s.id
+		WHERE s.daytime= DATE_FORMAT(NOW(),'%Y-%m-%d') and (a.available is null or a.available='1')  and (a.status is null or a.status!='2' )
+		and a.userId=#{id})
+		and i.able='1'
+		</if>
+		order by i.focusNum desc
+	</select>
+	
+	<!-- 获取预告的任务 -->
+	<select id="getPreTaskList" parameterType="Integer" resultType="com.htjy.entity.TaskModel">
+		SELECT distinct i.* FROM tb_task_schedule_info s 
+		left JOIN tb_task_info i on i.id=s.tid
+		LEFT JOIN tb_task_apply_info a on a.sid=s.id
+		WHERE s.daytime> DATE_FORMAT(NOW(),'%Y-%m-%d') 
+	</select>
+	<!-- 获取预告的任务（赏金排序）-->
+	<select id="getPreTaskListScore" parameterType="Integer" resultType="com.htjy.entity.TaskModel">
+		SELECT distinct i.* FROM tb_task_schedule_info s 
+		left JOIN tb_task_info i on i.id=s.tid
+		LEFT JOIN tb_task_apply_info a on a.sid=s.id
+		WHERE s.daytime>DATE_FORMAT(NOW(),'%Y-%m-%d') 
+		order by i.score desc
+	</select>
+	<!-- 获取预告的任务（赏金排序）-->
+	<select id="getPreTaskListDay" parameterType="Integer" resultType="com.htjy.entity.TaskModel">
+		SELECT distinct i.* FROM tb_task_schedule_info s 
+		left JOIN tb_task_info i on i.id=s.tid
+		LEFT JOIN tb_task_apply_info a on a.sid=s.id
+		WHERE i.truePeriod >DATE_FORMAT(NOW(),'%Y-%m-%d') 
+		order by s.daytime
+	</select>
+	<!-- 获取预告的任务（赏金排序）-->
+	<select id="getPreTaskListFocus" parameterType="Integer" resultType="com.htjy.entity.TaskModel">
+		SELECT distinct i.* FROM tb_task_schedule_info s 
+		left JOIN tb_task_info i on i.id=s.tid
+		LEFT JOIN tb_task_apply_info a on a.sid=s.id
+		WHERE s.daytime>DATE_FORMAT(NOW(),'%Y-%m-%d') 
+		order by i.focusNum desc
+	</select>
+	
 	<!-- 获取今日任务的详细 -->
 	<select id="getTodayTaskDetail" parameterType="String" resultType="com.htjy.entity.TaskModel">
 		select * from tb_task_info i
@@ -79,7 +144,7 @@
 	    SELECT LAST_INSERT_ID() AS aid 
 	    </selectKey>
 		insert into tb_task_apply_info (sid,userId,status,startTime,endTime,available)
-		value(#{sid},#{userId},#{status},#{startTime},#{endTime},'0')
+		value(#{sid},#{userId},#{status},#{startTime},#{endTime},'1')
 	</insert>
 	<!-- 更新可用性 -->
 	<update id="updateAvail" parameterType="Integer">
@@ -89,7 +154,7 @@
 	</update>
 	<!-- 获取和我先关的任务，即被我接受过的任务 -->
 	<select id="getMyAcceptTaskList" parameterType="String" resultType="com.htjy.entity.TaskModel">
-		select i.*,a.startTime,a.endTime,a.sid,a.userId,a.status,a.id aid,a.picture from tb_task_apply_info a
+		select i.*,a.startTime,a.endTime,a.sid,a.userId,a.status,a.id aid,a.picture,a.photoAddr,a.reason from tb_task_apply_info a
 		left join tb_task_schedule_info s on s.id=a.sid  
 		left join tb_task_info i on i.id=s.tid
 		where a.userId=#{id} 
@@ -102,13 +167,13 @@
 	</select>
 	<!-- 获取正在进行中的任务的详细 -->
 	<select id="getTaskingDetail" parameterType="String" resultType="com.htjy.entity.TaskModel">
-		select i.*,a.startTime,a.endTime,a.sid,a.userId,a.status,a.id aid,a.picture from tb_task_apply_info a
+		select i.*,a.startTime,a.endTime,a.sid,a.userId,a.status,a.id aid,a.picture,a.photoAddr,a.reason from tb_task_apply_info a
 		left join tb_task_schedule_info s on s.id=a.sid  
 		left join tb_task_info i on i.id=s.tid
 		where a.userId=#{uid} and a.id=#{aid}
 	</select>
 	<select id="updateTaskingStatus" parameterType="String" resultType="String">
-		update tb_task_apply_info set picture=#{fileName},status='1',finishTime=now() where id=#{aid}
+		update tb_task_apply_info set picture=#{fileName},status='1',reason='0',photoAddr=#{ad},finishTime=now() where id=#{aid}
 	</select>
 	<!-- 取消任务 -->
 	<delete id="cancelMyAcceptTask" parameterType="String">
@@ -116,10 +181,19 @@
 	</delete>
 	<!-- 管理员获取待审核列表 -->
 	<select id="getCheckingTaskList" parameterType="String" resultType="com.htjy.entity.TaskModel">
-		select i.*,a.startTime,a.endTime,a.finishTime,a.sid,a.userId,a.status,a.id aid,a.picture,u.phone,u.loginName from tb_task_apply_info a
+		select i.*,a.startTime,a.endTime,a.finishTime,a.sid,a.userId,a.status,a.id aid,a.picture,u.phone,u.loginName,a.photoAddr,a.reason from tb_task_apply_info a
 		left join tb_task_schedule_info s on s.id=a.sid  
 		left join tb_task_info i on i.id=s.tid
-		left join tb_task_user u on u.id=a.userId
+		left join tb_task_user u on u.id=a.userId 
+		order by 
+			case a.status 
+			when 2 then 1		-- 当值为2，排在第一个
+			when 1 then 2		-- 当值为1，排在第二个
+			when 3 then 3		-- 当值为3，排在第三个
+			when 4 then 4		-- 当值为4，排在第4个
+			end,a.finishTime
+			
+		asc
 	--	where a.status = '1'
 	</select>
 	<!-- 审核通过 -->
@@ -129,7 +203,7 @@
 	</update>
 	<!-- 审核失败-->
 	<update id="updateTaskingStatusNo" parameterType="String">
-		update tb_task_apply_info set status='3',available='1',checkTime=now(),checkPerson='1'
+		update tb_task_apply_info set status='3',available='1',checkTime=now(),checkPerson='1',reason='1'
 		where id=#{aid}
 	</update>
 	<!-- 待审核数量 -->
@@ -229,6 +303,60 @@
 	</update>
 	<select id="getCollectByCid" parameterType="String" resultType="com.htjy.entity.TaskCollectModel">
 		select * from tb_task_user_score_collect_info where id=#{cid}
+	</select>
+	<select id ="queryRepeat" parameterType="com.htjy.entity.TaskCollectModel" resultType="int">
+		select count(*) from tb_task_info where title=#{title} and lockTime=#{lockTime} and location=#{location} and address=#{address} and score=#{score} and schedule=#{schedule}
+	</select>
+	<!-- 查询应该发送信息的人 -->
+	<select id="queryMsgPeopleByAid" parameterType="int" resultType="int">
+		select userId from tb_task_apply_info where sid in (
+			select sid from tb_task_apply_info where id=#{aid}
+		) and id!=#{aid}
+	</select>
+	<!-- 有人完成之后，执行的过期更新状态任务 -->
+	<update id="updateOtherScheduleStatus">
+		update tb_task_apply_info set status='4',available='0',reason='2'
+		where userId=#{userId} and sid in 
+		<foreach collection="sid" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+	</update>
+	<select id="selectMsgSid" parameterType="int" resultType="int">
+		select sid from tb_task_apply_info where id=#{aid}
+	</select>
+	<!-- 1某人关注 2某人取消关注 3关注度＋ 4关注度- -->
+	<insert id="focusSbPlus">
+		insert into tb_task_focus_info (tid,userId) values(#{tid},#{userId})
+	</insert>
+	<delete id="focusSbDiv">
+		delete from tb_task_focus_info where tid = #{tid} and userId=#{userId}
+	</delete>
+	<update id="focusTaskPlus">
+		update tb_task_info set focusNum = focusNum+1 where id=#{tid}
+	</update>
+	<update id="focusTaskDiv">
+		update tb_task_info set focusNum = focusNum-1 where id=#{tid}
+	</update>
+	<!-- 获取用户的关注列表 -->
+	<select id="getUserFocusList" parameterType="int" resultType="int">
+		select tid from tb_task_focus_info where userId=#{userId}
+	</select>
+	<select id="queryTaskIdByAid" parameterType="int" resultType="int">
+		select id from tb_task_info 
+		where id=(select tid from tb_task_schedule_info 
+		where id=(select sid from tb_task_apply_info where id=#{aid}))
+	</select>
+	<update id="updateTaskAble">
+		update tb_task_info set able='0' where id=#{tid}
+	</update>
+	
+	<select id="queryTaskIdAndPerson" parameterType="int" resultType="int">
+		select count(id) from tb_task_apply_info where sid in (select id from tb_task_schedule_info where tid=#{tid}) and userId=#{userId}
+	</select>
+	<select id="getPhotoNumEtc" parameterType="int" resultType="com.htjy.entity.TaskModel">
+		select title,photoNum from tb_task_info 
+		where id=(select tid from tb_task_schedule_info 
+		where id=(select sid from tb_task_apply_info where id=#{aid}))	
 	</select>
 </mapper>
  

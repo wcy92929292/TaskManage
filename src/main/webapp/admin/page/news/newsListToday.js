@@ -314,6 +314,8 @@ layui.config({
 			    	+'<td><input type="checkbox" name="checked" lay-skin="primary" lay-filter="choose"></td>'
 			    	+'<td align="left">'+currData[i].title+'</td>'
 			    	+'<td>admin</td>'+'<td>'+currData[i].loginName+'</td>'+'<td> '+str+'</td>';
+					var add = currData[i].photoAddr==null?'':currData[i].photoAddr;
+					dataHtml += '<td>'+add+'</td>';
 			    	if(currData[i].status == 1){
 			    		dataHtml += '<td style="color:#f00">'+transStatus(currData[i].status)+'</td>';
 			    	}else if(currData[i].status == 2){

@@ -28,8 +28,13 @@ $.ajax({
     		var str ="";
     		if(data.result[i].status=="0"){
     			str ='<div class="button">'+
-			        	'<a href="apply1.html?aid='+data.result[i].aid+'" class="liji">去完成</a>'+
+			        	'<a href="applyTask.html?aid='+data.result[i].aid+'" class="liji">去完成</a>'+
 			            '<a href="#" id="cancel" aid="'+data.result[i].aid+'" class="qu">取消</a>'+
+			        '</div>';
+    		}
+    		if(data.result[i].status=="3"){
+    			str ='<div class="button">'+
+			        	'<a href="applyTask.html?aid='+data.result[i].aid+'" class="liji">重传照片</a>'+
 			        '</div>';
     		}
     		$("#ding_d").append(
@@ -37,11 +42,12 @@ $.ajax({
         			'<a href="details.html?aid='+data.result[i].aid+'&sid='+data.result[i].sid+'">'+
     	    	        '<div class="sp_pr">'+
     	    	                '<div class="text_p">'+
-    	    	                    '<p>'+data.result[i].title+'('+getDateTimeStrDate(data.result[i].startTime)+')</p>'+
+    	    	                    '<p>'+data.result[i].title+'</p>'+
+    	    	                    '<span class="yue">'+'('+data.result[i].truePeriod+')</span>'+
     	    	                    '<span class="yue" style="margin-top:1.286em;">领取时间：'+time1+'</span>'+
-    	    	                    '<span class="yue" style="margin-top:1.286em;">过期时间：'+time2+'</span>'+
+//    	    	                    '<span class="yue" style="margin-top:1.286em;">过期时间：'+time2+'</span>'+
     	    	                '</div>'+
-    	    	            '<span class="spanStatus">'+tranStatus(data.result[i].status)+'</span>'+
+    	    	            '<span class="spanStatus" style="margin-top: 1em;">'+tranStatus(data.result[i].status)+'</span>'+
     	    	        '</div>'+
         	        '</a>'+ str+
         	    '</div>'		
